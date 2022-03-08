@@ -14,17 +14,20 @@ def get_data(port):
     p.listen(5)
     # 等待客户端链接
     conn, client = p.accept()
+    print(f"successfully connection :{conn}")
 
     # 收发消息
     data = []
     idx = 0
     start_time = int(round(time.time() * 1000))
     while True:
-        packet = conn.recv(4096)
+        packet = conn.recv(1024)
         data.append(packet)
-        # print(f"{idx} - {len(packet)}")
-        # idx += 1
-        if len(packet) < 4096: break
+        # 100mb 提醒一次
+        if idx % (1024 * 100) == 0:
+            print(f"{(idx/(1024*100)) :.0f} * 100MB")
+        idx += 1
+        if len(packet) < 1024: break
     parse_data = pickle.loads(b"".join(data))
     end_time = int(round(time.time() * 1000))
 
@@ -43,12 +46,9 @@ def send_data(port,x):
     p = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     # 请求连接
     p.connect(('127.0.0.1', port))
-    p.send(pickle.dumps(x))
-
-    p.send(pickle.dumps(x))
+    p.sendall(pickle.dumps(x))
 
     data = p.recv(1024)
-    print("yes")
     print(data)
 
     p.close()

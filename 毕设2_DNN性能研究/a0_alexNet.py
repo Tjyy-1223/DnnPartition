@@ -132,13 +132,13 @@ def show_features(alexnet,x):
             total_num = 1
             for num in x.shape:
                 total_num *= num
-            type_size = 32
+            type_size = 4
             size = total_num * type_size / 1000 / 1000
 
             print("------------------------------------------------------------------")
             print(f'{idx}-{layer} \n'
                   f'computation time: {(end_time - start_time) / 1000 :>3} s\n'
-                  f'output shape: {x.shape}\t transport_num:{total_num}    transport_size:{size:.3f}M')
+                  f'output shape: {x.shape}\t transport_num:{total_num}    transport_size:{size:.3f}MB')
 
             # 计算各层的结构所包含的参数量 主要与计算时延相关
             # para = parameters.numel()
