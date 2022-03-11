@@ -14,15 +14,22 @@ AlexNet = AlexNet.to(device)
     2 - 选定一个层进行划分 在这里选定第 8 层 即第2次卷积层 + Relu之后
     得到edge_model 和 cloud_model 
 """
-point_index = 16
+point_index = 1
 edge_model,cloud_model = a0_alexNet.model_partition(AlexNet,point_index)
 
 """
     3.用cloud_model在云端进行计算并记录时间
 """
 x = socket_function.get_data(8080)
+x.requires_grad = False
 
 start_time = int(round(time.time() * 1000))
-x = cloud_model(x)
+cloud_x = cloud_model(x)
 end_time = int(round(time.time() * 1000))
 print(f"云端计算用时 : {(end_time - start_time) / 1000 :>3} s\n")
+
+
+"""
+    4.确认一下cloud_model的运算过程
+"""
+a0_alexNet.show_features(cloud_model,x)
