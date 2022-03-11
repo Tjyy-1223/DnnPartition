@@ -31,13 +31,14 @@ def get_data(port):
     parse_data = pickle.loads(b"".join(data))
     end_time = int(round(time.time() * 1000))
 
-    print(f"client data: {parse_data.shape}\ntime: {(end_time - start_time) / 1000 :>3}s")
+    print(f"client data: {parse_data.shape} \n传输时延: {(end_time - start_time) / 1000 :>3}s")
 
     conn.send("yes".encode("UTF-8"))
 
     # 关闭连接
     conn.close()
     p.close()
+    return parse_data
 
 
 
@@ -46,10 +47,13 @@ def send_data(port,x):
     p = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     # 请求连接
     p.connect(('127.0.0.1', port))
-    p.sendall(pickle.dumps(x))
+    x = pickle.dumps(x)
 
+    start_time = int(round(time.time() * 1000))
+    p.sendall(x)
     data = p.recv(1024)
-    print(data)
+    end_time = int(round(time.time() * 1000))
+    print(f"传输时延 : {(end_time - start_time) / 1000 :>3} s")
 
     p.close()
 
