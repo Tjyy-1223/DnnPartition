@@ -14,7 +14,7 @@ AlexNet = AlexNet.to(device)
     2 - 选定一个层进行划分 在这里选定第 8 层 即第2次卷积层 + Relu之后
     得到edge_model 和 cloud_model 
 """
-point_index = 1
+point_index = 7
 edge_model,cloud_model = a0_alexNet.model_partition(AlexNet,point_index)
 
 """

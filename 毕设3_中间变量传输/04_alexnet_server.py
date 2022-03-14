@@ -49,6 +49,8 @@ for i in range(len(AlexNet) + 1):
     parse_data.requires_grad = False
     conn.sendall("yes".encode("UTF-8"))
 
+
+    time.sleep(2)
     start_time2 = int(round(time.time() * 1000))
     cloud_x = cloud_model(parse_data)
     end_time2 = int(round(time.time() * 1000))

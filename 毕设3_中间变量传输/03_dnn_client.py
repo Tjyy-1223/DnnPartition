@@ -14,10 +14,10 @@ AlexNet = AlexNet.to(device)
     2 - 选定一个层进行划分 在这里选定第 8 层 即第2次卷积层 + Relu之后
     得到edge_model 和 cloud_model 
 """
-point_index = 1
+point_index = 7
 edge_model,cloud_model = a0_alexNet.model_partition(AlexNet,point_index)
 
-x = torch.rand(size=(100,3,224,224))
+x = torch.rand(size=(1000,3,224,224))
 x = x.to(device)
 print(f"x device : {x.device}")
 
