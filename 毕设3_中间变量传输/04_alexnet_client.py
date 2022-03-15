@@ -35,16 +35,22 @@ for i in range(len(AlexNet) + 1):
     p.connect(('127.0.0.1', 8080))
     edge_x = pickle.dumps(edge_x)
 
+
+
     start_time = int(round(time.time() * 1000))
     p.sendall(edge_x)
     # 收到第一次信号 说明已经接收到了传过去的edge_x数据
     data = p.recv(1024)
+    # print(data)
     end_time = int(round(time.time() * 1000))
     print(f"传输时延 : {(end_time - start_time) / 1000 :>3} s")
 
 
+
+
     # 收到第二次信号 说明对面的云端数据已经计算完毕
     data2 = p.recv(1024)
+    # print("get the second yes,the entire computation has completed",data2)
     end_alltime = int(round(time.time() * 1000))
     print(f"从第{point_index}层进行划分\t云边协同计算用时 : {(end_alltime - start_alltime) / 1000 :>3} s")
     print("====================================")

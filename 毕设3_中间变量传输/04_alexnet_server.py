@@ -45,12 +45,14 @@ for i in range(len(AlexNet) + 1):
     parse_data = pickle.loads(b"".join(data))
     end_time = int(round(time.time() * 1000))
 
-    print(f"client data: {parse_data.shape} \n传输时延: {(end_time - start_time) / 1000 :>3}s")
+    print(f"传输时延: {(end_time - start_time) / 1000 :>3}s")
+    print(f"client data: {parse_data.shape}")
     parse_data.requires_grad = False
-    conn.sendall("yes".encode("UTF-8"))
 
+    data1 = "yes".encode("UTF-8")
+    # print("get the client's data,return yes to client",data1)
+    conn.sendall(data1)
 
-    time.sleep(2)
     start_time2 = int(round(time.time() * 1000))
     cloud_x = cloud_model(parse_data)
     end_time2 = int(round(time.time() * 1000))
