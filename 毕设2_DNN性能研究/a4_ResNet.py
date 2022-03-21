@@ -208,3 +208,6 @@ class ResNet(nn.Module):
 
 
 # resnet18 = ResNet(BasicBlock, [2, 2, 2, 2])
+
+def resnet18(**kwargs: Any) -> ResNet:
+    return ResNet(BasicBlock, [2, 2, 2, 2], **kwargs)
