@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 from torch import Tensor
 from typing import Optional, Tuple, List, Callable, Any
-from collections import abc
+from collections import abc, OrderedDict
 import torch.nn.functional as F
 import time
 from torchvision import models
@@ -34,10 +34,10 @@ class SentenceIterator(abc.Iterator):
                 layer = self.inception3[self._index - len]
             elif self._index < (self.len1 + self.len2 + self.len3):
                 len = self.len1 + self.len2
-                layer = self.classifier[self._index - len]
+                layer = self.inception4[self._index - len]
             elif self._index < (self.len1 + self.len2 + self.len3 + self.len4):
                 len = self.len1 + self.len2 + self.len3
-                layer = self.classifier[self._index - len]
+                layer = self.inception5[self._index - len]
             else:
                 len = self.len1 + self.len2 + self.len3 + self.len4
                 layer = self.classifier[self._index - len]
@@ -45,6 +45,7 @@ class SentenceIterator(abc.Iterator):
             raise StopIteration()
         else:
             self._index += 1
+        return layer
 
 class GoogLeNet(nn.Module):
     __constants__ = ["aux_logits", "transform_input"]
@@ -57,7 +58,7 @@ class GoogLeNet(nn.Module):
         # 是否对输入进行转换
         transform_input: bool = False,
         # 是否对模型进行初始化
-        init_weights: Optional[bool] = True,
+        init_weights: Optional[bool] = False,
         blocks: Optional[List[Callable[..., nn.Module]]] = None,
         dropout: float = 0.2,
         dropout_aux: float = 0.7,
@@ -76,11 +77,11 @@ class GoogLeNet(nn.Module):
 
 
         self.conv1 = conv_block(3, 64, kernel_size=7, stride=2, padding=3)
-        self.maxpool1 = nn.MaxPool2d(3, stride=2, ceil_mode=True)
+        self.maxpool1 = nn.MaxPool2d(3, stride=2)
         self.conv2 = conv_block(64, 64, kernel_size=1)
         self.conv3 = conv_block(64, 192, kernel_size=3, padding=1)
-        self.maxpool2 = nn.MaxPool2d(3, stride=2, ceil_mode=True)
-        self.featrues = nn.Sequential(
+        self.maxpool2 = nn.MaxPool2d(3, stride=2)
+        self.features = nn.Sequential(
             self.conv1,
             self.maxpool1,
             self.conv2,
@@ -88,10 +89,11 @@ class GoogLeNet(nn.Module):
             self.maxpool2
         )
 
+
         # inception 3
         self.inception3a = inception_block(192, 64, 96, 128, 16, 32, 32)
         self.inception3b = inception_block(256, 128, 128, 192, 32, 96, 64)
-        self.maxpool3 = nn.MaxPool2d(3, stride=2, ceil_mode=True)
+        self.maxpool3 = nn.MaxPool2d(3, stride=2)
         self.inception3 = nn.Sequential(
             self.inception3a,
             self.inception3b,
@@ -104,7 +106,7 @@ class GoogLeNet(nn.Module):
         self.inception4c = inception_block(512, 128, 128, 256, 24, 64, 64)
         self.inception4d = inception_block(512, 112, 144, 288, 32, 64, 64)
         self.inception4e = inception_block(528, 256, 160, 320, 32, 128, 128)
-        self.maxpool4 = nn.MaxPool2d(2, stride=2, ceil_mode=True)
+        self.maxpool4 = nn.MaxPool2d(2, stride=2)
         self.inception4 = nn.Sequential(
             self.inception4a,
             self.inception4b,
@@ -135,11 +137,10 @@ class GoogLeNet(nn.Module):
         self.fc = nn.Linear(1024, num_classes)
         self.classifier = nn.Sequential(
             self.avgpool,
+            nn.Flatten(),
             self.dropout,
             self.fc
         )
-
-
         if init_weights:
             for m in self.modules():
                 if isinstance(m, nn.Conv2d) or isinstance(m, nn.Linear):
@@ -156,7 +157,15 @@ class GoogLeNet(nn.Module):
             x = torch.cat((x_ch0, x_ch1, x_ch2), 1)
         return x
 
-    def forward(self, x: Tensor) -> Tuple[Tensor, Optional[Tensor], Optional[Tensor]]:
+    def forward(self,x):
+        x = self.features(x)
+        x = self.inception3(x)
+        x = self.inception4(x)
+        x = self.inception5(x)
+        x = self.classifier(x)
+        return x
+
+    def forward2(self, x: Tensor) -> Tuple[Tensor, Optional[Tensor], Optional[Tensor]]:
         # N x 3 x 224 x 224
         x = self.conv1(x)
         # N x 64 x 112 x 112
@@ -212,7 +221,7 @@ class GoogLeNet(nn.Module):
         return x, aux2, aux1
 
     def __len__(self):
-        return len(self.featrues) + len(self.inception3) + len(self.inception4) + len(self.inception5) + len(self.classifier)
+        return len(self.features) + len(self.inception3) + len(self.inception4) + len(self.inception5) + len(self.classifier)
 
     def __iter__(self):
         return SentenceIterator(self.features, self.inception3,self.inception4,self.inception5, self.classifier)
@@ -246,7 +255,7 @@ class Inception(nn.Module):
         )
 
         self.branch4 = nn.Sequential(
-            nn.MaxPool2d(kernel_size=3, stride=1, padding=1, ceil_mode=True),
+            nn.MaxPool2d(kernel_size=3, stride=1, padding=1),
             conv_block(in_channels, pool_proj, kernel_size=1),
         )
 

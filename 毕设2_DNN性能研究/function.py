@@ -40,12 +40,13 @@ def model_partition(alexnet, index):
     最后返回运行结果x
     修改：省略了 激活层 batchnormal层 以及 dropout层
 """
-def show_features(alexnet, x):
+def show_features(alexnet, x ,filter = True):
     if len(alexnet) > 0:
         idx = 1
         for layer in alexnet:
-            if isinstance(layer, nn.ReLU) or isinstance(layer, nn.BatchNorm2d) or isinstance(layer, nn.Dropout):
-                continue
+            if filter is True:
+                if isinstance(layer, nn.ReLU) or isinstance(layer, nn.BatchNorm2d) or isinstance(layer, nn.Dropout):
+                    continue
             start_time = int(round(time.time() * 1000))
             x = layer(x)
             end_time = int(round(time.time() * 1000))
@@ -87,12 +88,13 @@ def show_2model(edge_model, cloud_model):
     print(cloud_model)
 
 
-def show_1model(model):
+def show_1model(model,filter = True):
     if len(model) > 0:
         idx = 1
         for layer in model:
-            if isinstance(layer, nn.ReLU) or isinstance(layer, nn.BatchNorm2d) or isinstance(layer, nn.Dropout):
-                continue
+            if filter is True:
+                if isinstance(layer, nn.ReLU) or isinstance(layer, nn.BatchNorm2d) or isinstance(layer, nn.Dropout):
+                    continue
             print(f'{idx}-{layer}')
             idx += 1
     else:
