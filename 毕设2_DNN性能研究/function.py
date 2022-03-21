@@ -68,6 +68,7 @@ def show_features(alexnet, x):
             for name, parameters in layer.named_parameters():
                 print(f"{name}  :  parameters size {parameters.size()} \t parameters number {parameters.numel()}")
             idx += 1
+            time.sleep(2)
         return x
     else:
         print("this model is a empty model")
