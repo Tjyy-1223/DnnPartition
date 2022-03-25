@@ -142,7 +142,7 @@ class SentenceIterator(abc.Iterator):
             if self._index < self.len1:
                 layer = self.features[self._index]
             else:
-                len = self.len1 + self.len2
+                len = self.len1
                 layer = self.classifier[self._index - len]
 
         except IndexError:
