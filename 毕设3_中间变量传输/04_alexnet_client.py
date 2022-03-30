@@ -13,7 +13,7 @@ AlexNet = a0_alexNet.AlexNet(input_layer = 3,num_classes = 1000)
 AlexNet = AlexNet.to(device)
 
 
-x = torch.rand(size=(1000,3,224,224),requires_grad=False)
+x = torch.rand(size=(2000,3,224,224),requires_grad=False)
 x = x.to(device)
 print(f"x device : {x.device}")
 x.requires_grad = False
