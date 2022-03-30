@@ -33,9 +33,10 @@ for i in range(len(AlexNet) + 1):
     # 收发消息
     data = []
     idx = 0
-    start_time = int(round(time.time() * 1000))
     while True:
         packet = conn.recv(1024)
+        if(idx == 0):
+            start_time = int(round(time.time() * 1000))
         data.append(packet)
         # 100mb 提醒一次
         # if idx % (1024 * 100) == 0:
@@ -45,6 +46,13 @@ for i in range(len(AlexNet) + 1):
     parse_data = pickle.loads(b"".join(data))
     end_time = int(round(time.time() * 1000))
 
+
+    """
+        通过查看 starttime 和 endtime 的值
+        解决了网络传输过程中 服务端显示传输时延 比 客户端显示传输时延 大的问题
+    """
+    # print(start_time)
+    # print(end_time)
     print(f"传输时延: {(end_time - start_time) / 1000 :>3}s")
     print(f"client data: {parse_data.shape}")
     parse_data.requires_grad = False
@@ -54,8 +62,10 @@ for i in range(len(AlexNet) + 1):
     conn.sendall(data1)
 
     start_time2 = int(round(time.time() * 1000))
-    cloud_x = cloud_model(parse_data)
+    with torch.no_grad():
+        cloud_x = cloud_model(parse_data)
     end_time2 = int(round(time.time() * 1000))
+
     print(f"从第{point_index}层进行划分\t云端计算用时 : {(end_time2 - start_time2) / 1000 :>3} s")
     print("==============================================")
 

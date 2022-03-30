@@ -16,16 +16,19 @@ AlexNet = AlexNet.to(device)
 x = torch.rand(size=(1000,3,224,224),requires_grad=False)
 x = x.to(device)
 print(f"x device : {x.device}")
-
+x.requires_grad = False
+time.sleep(2)
 
 
 for i in range(len(AlexNet) + 1):
     point_index = i
     edge_model, cloud_model = a0_alexNet.model_partition(AlexNet, point_index)
 
+
     start_alltime = int(round(time.time() * 1000))
     start_time = int(round(time.time() * 1000))
-    edge_x = edge_model(x)
+    with torch.no_grad():
+        edge_x = edge_model(x)
     end_time = int(round(time.time() * 1000))
     print(f"从第{point_index}层进行划分\t边缘端计算用时 : {(end_time - start_time) / 1000 :>3} s")
 
@@ -43,13 +46,19 @@ for i in range(len(AlexNet) + 1):
     data = p.recv(1024)
     # print(data)
     end_time = int(round(time.time() * 1000))
+
+    """
+        通过查看 starttime 和 endtime 的值
+        解决了网络传输过程中 服务端显示传输时延 比 客户端显示传输时延 大的问题
+    """
+    # print(start_time)
+    # print(end_time)
     print(f"传输时延 : {(end_time - start_time) / 1000 :>3} s")
-
-
 
 
     # 收到第二次信号 说明对面的云端数据已经计算完毕
     data2 = p.recv(1024)
+    # print(data)
     # print("get the second yes,the entire computation has completed",data2)
     end_alltime = int(round(time.time() * 1000))
     print(f"从第{point_index}层进行划分\t云边协同计算用时 : {(end_alltime - start_alltime) / 1000 :>3} s")
