@@ -58,14 +58,15 @@ def show_features(alexnet, x ,filter = True):
             for i in range(15):
                 temp_x = torch.rand(temp_x.shape).to(device)
 
-                start_time = int(round(time.time() * 1000))
+                start_time = int(round(time.time()))
                 x = layer(temp_x)
-                end_time = int(round(time.time() * 1000))
+                print(x.shape)
+                end_time = int(round(time.time()))
 
                 all_time += end_time - start_time
 
             # print(x.device)
-            print(all_time)
+
             # 计算分割点 中间传输占用大小为多少m  主要与网络传输时延相关
             total_num = 1
             for num in x.shape:
