@@ -55,13 +55,18 @@ def show_features(alexnet, x ,filter = True):
 
             all_time = 0
             temp_x = x
-            for i in range(15):
+            for i in range(5):
                 temp_x = torch.rand(temp_x.shape).to(device)
 
-                start_time = int(round(time.time()))
+                # start_time = int(round(time.time()))
+                start_time = time.time()
                 x = layer(temp_x)
-                print(x.shape)
-                end_time = int(round(time.time()))
+                end_time = time.time()
+                # end_time = int(round(time.time()))
+
+                # print(start_time)
+                # print(end_time)
+                # print("=============")
 
                 all_time += end_time - start_time
 
@@ -76,7 +81,7 @@ def show_features(alexnet, x ,filter = True):
 
             print("------------------------------------------------------------------")
             print(f'{idx}-{layer} \n'
-                  f'computation time: {(all_time) / 1000 :>3} s\n'
+                  f'computation time: {(all_time):.3f} s\n'
                   f'output shape: {x.shape}\t transport_num:{total_num}    transport_size:{size:.3f}MB')
 
             # 计算各层的结构所包含的参数量 主要与计算时延相关
