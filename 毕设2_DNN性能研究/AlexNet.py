@@ -1,5 +1,6 @@
 import torch
 import a1_alexNet
+import function
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
 
@@ -13,7 +14,7 @@ alexnet = alexnet.to(device)
     set_index 为分割点
 """
 set_index = 0
-edge_model,cloud_model = a1_alexNet.model_partition(alexnet,set_index)
+edge_model,cloud_model = function.model_partition(alexnet,set_index)
 
 print(f"alexnet model : {len(alexnet)}")
 
@@ -27,4 +28,4 @@ x = x.to(device)
 print(f"x device : {x.device}")
 
 
-x = a1_alexNet.show_features(cloud_model,x)
+x = function.show_features(cloud_model,x)
