@@ -23,7 +23,7 @@ print(f"alexnet model : {len(alexnet)}")
 """
     模拟数据输入 
 """
-x = torch.rand(size=(1000,3,224,224))
+x = torch.rand(size=(500,3,224,224))
 x = x.to(device)
 print(f"x device : {x.device}")
 

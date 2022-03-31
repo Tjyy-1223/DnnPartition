@@ -42,9 +42,22 @@ def model_partition(alexnet, index):
     修改：省略了 激活层 batchnormal层 以及 dropout层
 """
 def show_features(alexnet, x ,filter = True):
-    # 生成锁对象，全局唯一
-    lock = threading.Lock()
+
     device = "cuda" if torch.cuda.is_available() else "cpu"
+
+    # GPU warm-up and prevent it from going into power-saving mode
+    dummy_input = torch.rand(x.shape).to(device)
+
+    # init loggers
+    starter = torch.cuda.Event(enable_timing=True)
+    ender = torch.cuda.Event(enable_timing=True)
+
+    # GPU warm-up
+    with torch.no_grad():
+        for i in range(3):
+            _ = alexnet(dummy_input)
+            print(f"GPU warm-up - {i+1}")
+
     if len(alexnet) > 0:
         idx = 1
         for layer in alexnet:
@@ -52,25 +65,26 @@ def show_features(alexnet, x ,filter = True):
                 if isinstance(layer, nn.ReLU) or isinstance(layer, nn.BatchNorm2d) or isinstance(layer, nn.Dropout):
                     continue
 
-
             all_time = 0
             temp_x = x
-            for i in range(5):
-                temp_x = torch.rand(temp_x.shape).to(device)
+            with torch.no_grad():
+                for i in range(3):
+                    temp_x = torch.rand(temp_x.shape).to(device)
 
-                # start_time = int(round(time.time()))
-                start_time = time.time()
-                x = layer(temp_x)
-                end_time = time.time()
-                # end_time = int(round(time.time()))
+                    # start_time = time.time()
 
-                # print(start_time)
-                # print(end_time)
-                # print("=============")
+                    starter.record()
+                    x = layer(temp_x)
+                    ender.record()
+                    # wait for GPU SYNC
+                    torch.cuda.synchronize()
+                    curr_time = starter.elapsed_time(ender)
 
-                all_time += end_time - start_time
 
-            # print(x.device)
+                    # end_time = time.time()
+
+                    # print(curr_time)
+                    all_time += curr_time
 
             # 计算分割点 中间传输占用大小为多少m  主要与网络传输时延相关
             total_num = 1
@@ -81,7 +95,7 @@ def show_features(alexnet, x ,filter = True):
 
             print("------------------------------------------------------------------")
             print(f'{idx}-{layer} \n'
-                  f'computation time: {(all_time):.3f} s\n'
+                  f'computation time: {(all_time):.3f} ms\n'
                   f'output shape: {x.shape}\t transport_num:{total_num}    transport_size:{size:.3f}MB')
 
             # 计算各层的结构所包含的参数量 主要与计算时延相关
