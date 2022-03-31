@@ -41,12 +41,15 @@ def model_partition(alexnet, index):
     修改：省略了 激活层 batchnormal层 以及 dropout层
 """
 def show_features(alexnet, x ,filter = True):
+    device = "cuda" if torch.cuda.is_available() else "cpu"
     if len(alexnet) > 0:
         idx = 1
         for layer in alexnet:
             if filter is True:
                 if isinstance(layer, nn.ReLU) or isinstance(layer, nn.BatchNorm2d) or isinstance(layer, nn.Dropout):
                     continue
+
+            x = torch.rand(x).to(device)
             start_time = int(round(time.time() * 1000))
             x = layer(x)
             end_time = int(round(time.time() * 1000))
