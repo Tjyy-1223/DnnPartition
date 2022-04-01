@@ -41,7 +41,7 @@ def model_partition(alexnet, index):
     最后返回运行结果x
     修改：省略了 激活层 batchnormal层 以及 dropout层
 """
-def show_features(alexnet, x ,filter = True):
+def show_features(alexnet, x ,filter = True,epoch = 3):
 
     device = "cuda" if torch.cuda.is_available() else "cpu"
 
@@ -52,11 +52,21 @@ def show_features(alexnet, x ,filter = True):
     starter = torch.cuda.Event(enable_timing=True)
     ender = torch.cuda.Event(enable_timing=True)
 
+    init_starter = torch.cuda.Event(enable_timing=True)
+    init_ender = torch.cuda.Event(enable_timing=True)
+
     # GPU warm-up
     with torch.no_grad():
         for i in range(3):
+            init_starter.record()
             _ = alexnet(dummy_input)
+            init_ender.record()
+            # wait for GPU SYNC
+            torch.cuda.synchronize()
+            curr_time = starter.elapsed_time(ender)
+
             print(f"GPU warm-up - {i+1}")
+            print(f'computation time: {curr_time :.3f} ms\n')
 
     if len(alexnet) > 0:
         idx = 1
@@ -68,7 +78,7 @@ def show_features(alexnet, x ,filter = True):
             all_time = 0
             temp_x = x
             with torch.no_grad():
-                for i in range(3):
+                for i in range(epoch):
                     temp_x = torch.rand(temp_x.shape).to(device)
 
                     # start_time = time.time()

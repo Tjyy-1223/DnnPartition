@@ -23,9 +23,9 @@ print(f"alexnet model : {len(alexnet)}")
 """
     模拟数据输入 
 """
-x = torch.rand(size=(500,3,224,224))
+x = torch.rand(size=(128,3,224,224))
 x = x.to(device)
 print(f"x device : {x.device}")
 
 
-x = function.show_features(cloud_model,x)
+x = function.show_features(alexnet = cloud_model,x = x,epoch=1)
