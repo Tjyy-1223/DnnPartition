@@ -81,8 +81,6 @@ def show_features_gpu(alexnet, x ,filter = True,epoch = 3):
                 for i in range(epoch):
                     temp_x = torch.rand(temp_x.shape).to(device)
 
-                    # start_time = time.time()
-
                     starter.record()
                     x = layer(temp_x)
                     ender.record()
@@ -90,8 +88,6 @@ def show_features_gpu(alexnet, x ,filter = True,epoch = 3):
                     torch.cuda.synchronize()
                     curr_time = starter.elapsed_time(ender)
 
-                    # end_time = time.time()
-                    # print(curr_time)
                     all_time += curr_time
 
             # 计算分割点 中间传输占用大小为多少m  主要与网络传输时延相关
@@ -103,7 +99,7 @@ def show_features_gpu(alexnet, x ,filter = True,epoch = 3):
 
             print("------------------------------------------------------------------")
             print(f'{idx}-{layer} \n'
-                  f'computation time: {(all_time):.3f} ms\n'
+                  f'computation time: {(all_time/epoch):.3f} ms\n'
                   f'output shape: {x.shape}\t transport_num:{total_num}    transport_size:{size:.3f}MB')
 
             # 计算各层的结构所包含的参数量 主要与计算时延相关
@@ -175,7 +171,7 @@ def show_features_cpu(alexnet, x ,filter = True,epoch = 3):
 
             print("------------------------------------------------------------------")
             print(f'{idx}-{layer} \n'
-                  f'computation time: {(all_time):.3f} s\n'
+                  f'computation time: {(all_time/epoch):.3f} s\n'
                   f'output shape: {x.shape}\t transport_num:{total_num}    transport_size:{size:.3f}MB')
 
             # 计算各层的结构所包含的参数量 主要与计算时延相关
