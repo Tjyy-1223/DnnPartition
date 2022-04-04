@@ -27,5 +27,7 @@ x = torch.rand(size=(256,3,224,224))
 x = x.to(device)
 print(f"x device : {x.device}")
 
-
-x = function.show_features(alexnet = cloud_model,x = x,epoch=1)
+if device == "cpu":
+    x = function.show_features_cpu(cloud_model,x,epoch=3)
+elif device == "cuda":
+    x = function.show_features_gpu(cloud_model,x,epoch=3)
