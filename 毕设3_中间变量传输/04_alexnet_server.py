@@ -12,7 +12,7 @@ device = "cuda" if torch.cuda.is_available() else "cpu"
 AlexNet = a0_alexNet.AlexNet(input_layer = 3,num_classes = 1000)
 AlexNet = AlexNet.to(device)
 
-x = torch.rand(size=(128,3,224,224),requires_grad=False)
+x = torch.rand(size=(1,3,224,224),requires_grad=False)
 x = x.to(device)
 print(f"x device : {x.device}")
 x.requires_grad = False
@@ -49,13 +49,23 @@ for i in range(len(AlexNet) + 1):
     conn, client = p.accept()
     print(f"successfully connection :{conn}")
     # 收发消息
+
+    """
+        step1 接收边缘端的计算时延
+    """
+    edge_time = conn.recv(1024)
+    print(f"从第{point_index}层进行划分\t边缘端计算用时 : {edge_time :.3f} ms")
+    edge_resp = "yes".encode("UTF-8")
+    conn.send(edge_resp)
+
+
     data = []
     idx = 0
     start_time = 0
     while True:
         packet = conn.recv(1024)
         if idx == 0:
-            start_time = time.time()
+            start_time = time.perf_counter()
         data.append(packet)
         # 100mb 提醒一次
         # if idx % (1024 * 100) == 0:
@@ -63,7 +73,7 @@ for i in range(len(AlexNet) + 1):
         idx += 1
         if len(packet) < 1024: break
     parse_data = pickle.loads(b"".join(data))
-    end_time = time.time()
+    end_time = time.perf_counter()
 
 
     """

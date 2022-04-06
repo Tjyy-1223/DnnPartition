@@ -14,7 +14,7 @@ AlexNet = a0_alexNet.AlexNet(input_layer = 3,num_classes = 1000)
 AlexNet = AlexNet.to(device)
 
 
-x = torch.rand(size=(128,3,224,224),requires_grad=False)
+x = torch.rand(size=(1,3,224,224),requires_grad=False)
 x = x.to(device)
 print(f"x device : {x.device}")
 x.requires_grad = False
@@ -33,11 +33,15 @@ with torch.no_grad():
         print(f"GPU warm-up - {i+1}")
 
 for i in range(len(AlexNet) + 1):
+    # 创建socket
+    p = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    # 请求连接
+    p.connect(('127.0.0.1', 8080))
+
     point_index = i
     edge_model, cloud_model = function.model_partition(AlexNet, point_index)
 
-    start_alltime = time.time()
-
+    start_alltime = time.perf_counter()
     # 开始记录时间
     starter.record()
     with torch.no_grad():
@@ -50,18 +54,20 @@ for i in range(len(AlexNet) + 1):
 
     print(f"从第{point_index}层进行划分\t边缘端计算用时 : {curr_time :.3f} ms")
 
-    # 创建socket
-    p = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    # 请求连接
-    p.connect(('127.0.0.1', 8080))
-    edge_x = pickle.dumps(edge_x)
+    """
+        step1 发送边缘端的计算时延
+    """
+    p.send(curr_time)
+    edge_resp = p.recv(1024)
+    print("边缘端计算时延 发送成功")
 
-    start_time = time.time()
+    edge_x = pickle.dumps(edge_x)
+    start_time = time.perf_counter()
     p.sendall(edge_x)
     # 收到第一次信号 说明已经接收到了传过去的edge_x数据
     data = p.recv(1024)
     # print(data)
-    end_time = time.time()
+    end_time = time.perf_counter()
 
     """
         通过查看 starttime 和 endtime 的值
@@ -76,7 +82,7 @@ for i in range(len(AlexNet) + 1):
     data2 = p.recv(1024)
     # print(data)
     # print("get the second yes,the entire computation has completed",data2)
-    end_alltime = time.time()
+    end_alltime = time.perf_counter()
 
     print(f"从第{point_index}层进行划分\t云边协同计算用时 : {(end_alltime - start_alltime)*1000:.3f} ms")
     print("====================================")
