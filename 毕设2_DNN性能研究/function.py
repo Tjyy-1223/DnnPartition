@@ -104,8 +104,8 @@ def show_features_gpu(alexnet, x ,filter = True,epoch = 3):
 
             # 计算各层的结构所包含的参数量 主要与计算时延相关
             # para = parameters.numel()
-            for name, parameters in layer.named_parameters():
-                print(f"{name}  :  parameters size {parameters.size()} \t parameters number {parameters.numel()}")
+            # for name, parameters in layer.named_parameters():
+            #     print(f"{name}  :  parameters size {parameters.size()} \t parameters number {parameters.numel()}")
             idx += 1
         return x
     else:
@@ -176,8 +176,8 @@ def show_features_cpu(alexnet, x ,filter = True,epoch = 3):
 
             # 计算各层的结构所包含的参数量 主要与计算时延相关
             # para = parameters.numel()
-            for name, parameters in layer.named_parameters():
-                print(f"{name}  :  parameters size {parameters.size()} \t parameters number {parameters.numel()}")
+            # for name, parameters in layer.named_parameters():
+            #     print(f"{name}  :  parameters size {parameters.size()} \t parameters number {parameters.numel()}")
             idx += 1
         return x
     else:
