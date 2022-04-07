@@ -1,4 +1,4 @@
-import a0_alexNet
+import a1_alexNet
 import socket_function
 import torch
 import time
@@ -15,7 +15,23 @@ def warmUp(model,x,device):
     with torch.no_grad():
         for i in range(3):
             _ = model(dummy_input)
-            print(f"GPU warm-up - {i+1}")
+
+        avg_time = 0.0
+
+        for i in range(300):
+            starter = torch.cuda.Event(enable_timing=True)
+            ender = torch.cuda.Event(enable_timing=True)
+            starter.record()
+
+            _ = model(dummy_input)
+
+            ender.record()
+            torch.cuda.synchronize()
+            curr_time = starter.elapsed_time(ender)
+            avg_time += curr_time
+        avg_time /= 10
+        print(f"GPU warm-up: {curr_time:.3f}ms")
+        print("==============================================")
 
 
 def startServer(ip,port):
@@ -32,7 +48,8 @@ def startServer(ip,port):
 
 def startListening(model,p,device,epoch):
     for point_index in range(len(AlexNet) + 1):
-        edge_model, cloud_model = function.model_partition(model, point_index)
+        _, cloud_model = function.model_partition(model, point_index)
+        # print(next(cloud_model.parameters()).device)
 
         # 等待客户端链接
         conn, client = p.accept()
@@ -77,7 +94,7 @@ def startListening(model,p,device,epoch):
         parse_data.requires_grad = False
 
         """ 这里 parse data 不用加to device：因为传过来的数据默认在cuda0上了"""
-        # parse_data = parse_data.to(device)
+        parse_data = parse_data.to(device)
         # print(parse_data.device)
 
         """
@@ -94,20 +111,20 @@ def startListening(model,p,device,epoch):
         # 开始记录时间
         server_time = 0.0
         for i in range(epoch):
+            parse_data = torch.rand(parse_data.shape).to(device)
             # init loggers
             starter = torch.cuda.Event(enable_timing=True)
             ender = torch.cuda.Event(enable_timing=True)
 
             starter.record()
             with torch.no_grad():
-                cloud_x = cloud_model(parse_data)
+                _ = cloud_model(parse_data)
             ender.record()
-
             # wait for GPU SYNC
             torch.cuda.synchronize()
             curr_time = starter.elapsed_time(ender)
             server_time += curr_time
-        server_time /= 10
+        server_time /= epoch
 
         print(f"从第{point_index}层进行划分\t云端计算用时 : {server_time :.3f} ms")
         print(f"从第{point_index}层进行划分\t云边协同计算用时 : {(edge_time + transport_time + server_time):.3f} ms")
@@ -122,7 +139,7 @@ def startListening(model,p,device,epoch):
 if __name__ == '__main__':
     device = "cuda" if torch.cuda.is_available() else "cpu"
 
-    AlexNet = a0_alexNet.AlexNet(input_layer=3, num_classes=1000)
+    AlexNet = a1_alexNet.AlexNet(input_layer=3, num_classes=1000)
     AlexNet = AlexNet.to(device)
 
     x = torch.rand(size=(1, 3, 224, 224), requires_grad=False)
@@ -135,7 +152,7 @@ if __name__ == '__main__':
     port = 8090
     p = startServer(ip,port)
 
-    epoch = 10
+    epoch = 300
     startListening(AlexNet,p,device,epoch)
 
 

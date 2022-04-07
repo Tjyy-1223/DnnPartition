@@ -1,4 +1,4 @@
-import a0_alexNet
+import a1_alexNet
 import function
 import torch
 import time
@@ -6,7 +6,7 @@ import socket
 import pickle
 
 
-def warmUp(model,x):
+def warmUp(model,x,device):
     # GPU warm-up and prevent it from going into power-saving mode
     dummy_input = torch.rand(x.shape).to(device)
 
@@ -14,24 +14,40 @@ def warmUp(model,x):
     with torch.no_grad():
         for i in range(3):
             _ = model(dummy_input)
-            print(f"GPU warm-up - {i+1}")
+
+        avg_time = 0.0
+
+        for i in range(300):
+            starter = torch.cuda.Event(enable_timing=True)
+            ender = torch.cuda.Event(enable_timing=True)
+            starter.record()
+
+            _ = model(dummy_input)
+
+            ender.record()
+            torch.cuda.synchronize()
+            curr_time = starter.elapsed_time(ender)
+            avg_time += curr_time
+        avg_time /= 10
+        print(f"GPU warm-up: {curr_time:.3f}ms")
+        print("==============================================")
 
 
-def startClient(model,x,ip,port,epoch):
-    global edge_x
+def startClient(model,x,device,ip,port,epoch):
     for point_index in range(len(AlexNet) + 1):
         # 创建socket
         p = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         # 请求连接
         p.connect((ip,port))
 
-        edge_model, cloud_model = function.model_partition(model, point_index)
+        edge_model, _ = function.model_partition(model, point_index)
 
         """
             step1 记录边缘端的计算用时
         """
         edge_time = 0.0
         for i in range(epoch):
+            x = torch.rand(x.shape).to(device)
             # init loggers
             starter = torch.cuda.Event(enable_timing=True)
             ender = torch.cuda.Event(enable_timing=True)
@@ -88,19 +104,19 @@ if __name__ == '__main__':
 
     device = "cuda" if torch.cuda.is_available() else "cpu"
 
-    AlexNet = a0_alexNet.AlexNet(input_layer=3, num_classes=1000)
+    AlexNet = a1_alexNet.AlexNet(input_layer=3, num_classes=1000)
     AlexNet = AlexNet.to(device)
 
     x = torch.rand(size=(1, 3, 224, 224), requires_grad=False)
     x = x.to(device)
     print(f"x device : {x.device}")
 
-    warmUp(AlexNet,x)
+    warmUp(AlexNet,x,device)
 
     ip = "127.0.0.1"
     port = 8090
-    epoch = 10
-    startClient(AlexNet,x,ip,port,epoch)
+    epoch = 300
+    startClient(AlexNet,x,device,ip,port,epoch)
 
 
 
