@@ -141,7 +141,7 @@ def show_features_cpu(alexnet, x ,filter = True,epoch = 3):
             curr_time = end - start
 
             print(f"CPU warm-up - {i+1}")
-            print(f'computation time: {curr_time :.3f} s\n')
+            print(f'computation time: {curr_time*1000 :.3f} ms\n')
 
     if len(alexnet) > 0:
         idx = 1
@@ -171,7 +171,7 @@ def show_features_cpu(alexnet, x ,filter = True,epoch = 3):
 
             print("------------------------------------------------------------------")
             print(f'{idx}-{layer} \n'
-                  f'computation time: {(all_time/epoch):.3f} s\n'
+                  f'computation time: {(all_time/epoch)*1000:.3f} ms\n'
                   f'output shape: {x.shape}\t transport_num:{total_num}    transport_size:{size:.3f}MB')
 
             # 计算各层的结构所包含的参数量 主要与计算时延相关
