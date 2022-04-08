@@ -6,7 +6,7 @@ import socket
 import pickle
 
 
-def warmUp(model,x,device):
+def warmUpGpu(model,x,device):
     # GPU warm-up and prevent it from going into power-saving mode
     dummy_input = torch.rand(x.shape).to(device)
 
@@ -28,9 +28,69 @@ def warmUp(model,x,device):
             torch.cuda.synchronize()
             curr_time = starter.elapsed_time(ender)
             avg_time += curr_time
-        avg_time /= 10
+        avg_time /= 300
         print(f"GPU warm-up: {curr_time:.3f}ms")
         print("==============================================")
+
+
+def warmUpCpu(model,x,device):
+    # GPU warm-up and prevent it from going into power-saving mode
+    dummy_input = torch.rand(x.shape).to(device)
+
+    # GPU warm-up
+    with torch.no_grad():
+        for i in range(3):
+            _ = model(dummy_input)
+
+        avg_time = 0.0
+
+        for i in range(10):
+            start = time.perf_counter()
+            _ = model(dummy_input)
+            end = time.perf_counter()
+            curr_time = end - start
+            avg_time += curr_time
+        avg_time /= 10
+        print(f"CPU warm-up: {curr_time:.3f}ms")
+        print("==============================================")
+
+
+def recordTimeGpu(model, x, device, epoch):
+    all_time = 0.0
+    for i in range(epoch):
+        x = torch.rand(x.shape).to(device)
+        # init loggers
+        starter = torch.cuda.Event(enable_timing=True)
+        ender = torch.cuda.Event(enable_timing=True)
+
+        with torch.no_grad():
+            starter.record()
+            res_x = model(x)
+            ender.record()
+
+        # wait for GPU SYNC
+        torch.cuda.synchronize()
+        curr_time = starter.elapsed_time(ender)
+        all_time += curr_time
+    all_time /= epoch
+    return res_x, all_time
+
+
+def recordTimeCpu(model, x, device, epoch):
+    all_time = 0.0
+    for i in range(epoch):
+        x = torch.rand(x.shape).to(device)
+
+        with torch.no_grad():
+            start_time = time.perf_counter()
+            res_x = model(x)
+            end_time = time.perf_counter()
+
+        curr_time = end_time - start_time
+        all_time += curr_time
+    all_time /= epoch
+    return res_x, all_time * 1000
+
 
 
 def startClient(model,x,device,ip,port,epoch):
@@ -45,22 +105,11 @@ def startClient(model,x,device,ip,port,epoch):
         """
             step1 记录边缘端的计算用时
         """
-        edge_time = 0.0
-        for i in range(epoch):
-            x = torch.rand(x.shape).to(device)
-            # init loggers
-            starter = torch.cuda.Event(enable_timing=True)
-            ender = torch.cuda.Event(enable_timing=True)
+        if device == "cuda":
+            edge_x,edge_time = recordTimeGpu(edge_model,x,device,epoch)
+        elif device == "cpu":
+            edge_x,edge_time = recordTimeCpu(edge_model, x, device, epoch)
 
-            starter.record()
-            with torch.no_grad():
-                edge_x = edge_model(x)
-            ender.record()
-            # wait for GPU SYNC
-            torch.cuda.synchronize()
-            curr_time = starter.elapsed_time(ender)
-            edge_time += curr_time
-        edge_time /= epoch
         print(f"从第{point_index}层进行划分\t边缘端计算用时 : {edge_time :.3f} ms")
 
         """
@@ -92,6 +141,7 @@ def startClient(model,x,device,ip,port,epoch):
         """
         # 收到第二次信号 说明对面的云端数据已经计算完毕
         edge_resp3 = p.recv(1024).decode("utf-8")
+
         print("云边协同计算完成",edge_resp3)
         end_alltime = time.perf_counter()
         # print(f"从第{point_index}层进行划分\t云边协同计算用时 : {(end_alltime - start_alltime)*1000:.3f} ms")
@@ -111,7 +161,10 @@ if __name__ == '__main__':
     x = x.to(device)
     print(f"x device : {x.device}")
 
-    warmUp(AlexNet,x,device)
+    if device == "cuda":
+        warmUpGpu(AlexNet,x,device)
+    elif device == "cpu":
+        warmUpCpu(AlexNet,x,device)
 
     ip = "127.0.0.1"
     port = 8090
