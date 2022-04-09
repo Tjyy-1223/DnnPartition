@@ -84,6 +84,16 @@ class AlexNet(nn.Module):
     def __len__(self):
         return (len(self.features) + 1 + len(self.classifier))
 
+    def __getitem__(self, item):
+        index = -1
+        for layer in AlexNet():
+            index += 1
+            if(index >= item):
+                return layer
+
+
+
+
 """
 model_partition函数可以将一个整体的model 划分成两个部分
     划分的大致思路：
