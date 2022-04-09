@@ -71,6 +71,9 @@ class AlexNet(nn.Module):
             nn.ReLU(inplace=True),
             nn.Linear(4096, num_classes),
         )
+        self.len1 = len(self.features)
+        self.len2 = 1
+        self.len3 = len(self.classifier)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         x = self.features(x)
@@ -85,11 +88,16 @@ class AlexNet(nn.Module):
         return (len(self.features) + 1 + len(self.classifier))
 
     def __getitem__(self, item):
-        index = -1
-        for layer in AlexNet():
-            index += 1
-            if(index >= item):
-                return layer
+        try:
+            if item < self.len1:
+                layer = self.features[item]
+            elif item < (self.len1 + self.len2):
+                layer = self.avgpool
+            else:
+                layer = self.classifier[item - self.len1 - self.len2]
+        except IndexError:
+            raise StopIteration()
+        return layer
 
 
 

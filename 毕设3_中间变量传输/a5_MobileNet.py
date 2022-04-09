@@ -228,6 +228,9 @@ class MobileNetV2(nn.Module):
             nn.Linear(self.last_channel, num_classes),
         )
 
+        self.len1 = len(self.features)
+        self.len2 = len(self.classifier)
+
         # weight initialization
         for m in self.modules():
             if isinstance(m, nn.Conv2d):
@@ -254,6 +257,18 @@ class MobileNetV2(nn.Module):
 
     def __iter__(self):
         return SentenceIterator(self.features,self.classifier)
+
+    def __getitem__(self, item):
+        try:
+            if item < self.len1:
+                layer = self.features[item]
+            else:
+                len = self.len1
+                layer = self.classifier[item - len]
+
+        except IndexError:
+            raise StopIteration()
+        return layer
 
 
 

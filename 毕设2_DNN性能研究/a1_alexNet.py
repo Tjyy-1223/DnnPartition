@@ -71,6 +71,9 @@ class AlexNet(nn.Module):
             nn.ReLU(inplace=True),
             nn.Linear(4096, num_classes),
         )
+        self.len1 = len(self.features)
+        self.len2 = 1
+        self.len3 = len(self.classifier)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         x = self.features(x)
@@ -83,6 +86,21 @@ class AlexNet(nn.Module):
 
     def __len__(self):
         return (len(self.features) + 1 + len(self.classifier))
+
+    def __getitem__(self, item):
+        try:
+            if item < self.len1:
+                layer = self.features[item]
+            elif item < (self.len1 + self.len2):
+                layer = self.avgpool
+            else:
+                layer = self.classifier[item - self.len1 - self.len2]
+        except IndexError:
+            raise StopIteration()
+        return layer
+
+
+
 
 """
 model_partition函数可以将一个整体的model 划分成两个部分

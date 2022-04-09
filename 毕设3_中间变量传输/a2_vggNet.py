@@ -54,6 +54,9 @@ class VGG(nn.Module):
             nn.Dropout(),
             nn.Linear(4096, num_classes),
         )
+        self.len1 = len(self.features)
+        self.len2 = 1
+        self.len3 = len(self.classifier)
         if init_weights:
             self._initialize_weights()
 
@@ -69,6 +72,18 @@ class VGG(nn.Module):
 
     def __len__(self):
         return len(self.features) + len(self.classifier) + 1
+
+    def __getitem__(self, item):
+        try:
+            if item < self.len1:
+                layer = self.features[item]
+            elif item < (self.len1 + self.len2):
+                layer = self.avgpool
+            else:
+                layer = self.classifier[item - self.len1 - self.len2]
+        except IndexError:
+            raise StopIteration()
+        return layer
 
     def _initialize_weights(self) -> None:
         for m in self.modules():

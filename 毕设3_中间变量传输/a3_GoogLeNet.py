@@ -141,6 +141,8 @@ class GoogLeNet(nn.Module):
             self.dropout,
             self.fc
         )
+
+
         if init_weights:
             for m in self.modules():
                 if isinstance(m, nn.Conv2d) or isinstance(m, nn.Linear):
@@ -148,6 +150,12 @@ class GoogLeNet(nn.Module):
                 elif isinstance(m, nn.BatchNorm2d):
                     nn.init.constant_(m.weight, 1)
                     nn.init.constant_(m.bias, 0)
+
+        self.len1 = len(self.features)
+        self.len2 = len(self.inception3)
+        self.len3 = len(self.inception4)
+        self.len4 = len(self.inception5)
+        self.len5 = len(self.classifier)
 
     def _transform_input(self, x: Tensor) -> Tensor:
         if self.transform_input:
@@ -225,6 +233,26 @@ class GoogLeNet(nn.Module):
 
     def __iter__(self):
         return SentenceIterator(self.features, self.inception3,self.inception4,self.inception5, self.classifier)
+
+    def __getitem__(self, item):
+        try:
+            if item < self.len1:
+                layer = self.features[item]
+            elif item < (self.len1 + self.len2):
+                len = self.len1
+                layer = self.inception3[item - len]
+            elif item < (self.len1 + self.len2 + self.len3):
+                len = self.len1 + self.len2
+                layer = self.inception4[item - len]
+            elif item < (self.len1 + self.len2 + self.len3 + self.len4):
+                len = self.len1 + self.len2 + self.len3
+                layer = self.inception5[item - len]
+            else:
+                len = self.len1 + self.len2 + self.len3 + self.len4
+                layer = self.classifier[item - len]
+        except IndexError:
+            raise StopIteration()
+        return layer
 
 
 class Inception(nn.Module):

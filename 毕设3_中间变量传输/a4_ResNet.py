@@ -148,6 +148,13 @@ class ResNet(nn.Module):
             self.fc
         )
 
+        self.len1 = len(self.features)
+        self.len2 = len(self.layer1)
+        self.len3 = len(self.layer2)
+        self.len4 = len(self.layer3)
+        self.len5 = len(self.layer4)
+        self.len6 = len(self.classifier)
+
         for m in self.modules():
             if isinstance(m, nn.Conv2d):
                 nn.init.kaiming_normal_(m.weight, mode="fan_out", nonlinearity="relu")
@@ -206,6 +213,34 @@ class ResNet(nn.Module):
     def __iter__(self):
         return SentenceIterator(self.features, self.layer1, self.layer2, self.layer3,self.layer4, self.classifier)
 
+    def __getitem__(self, item):
+        try:
+            if item < self.len1:
+                layer = self.features[item]
+
+            elif item < (self.len1 + self.len2):
+                len = self.len1
+                layer = self.layer1[item - len]
+
+            elif item < (self.len1 + self.len2 + self.len3):
+                len = self.len1 + self.len2
+                layer = self.layer2[item - len]
+
+            elif item < (self.len1 + self.len2 + self.len3 + self.len4):
+                len = self.len1 + self.len2 + self.len3
+                layer = self.layer3[item - len]
+
+            elif item < (self.len1 + self.len2 + self.len3 + self.len4 + self.len5):
+                len = self.len1 + self.len2 + self.len3 + self.len4
+                layer = self.layer4[item - len]
+
+            else:
+                len = self.len1 + self.len2 + self.len3 + self.len4 + self.len5
+                layer = self.classifier[item - len]
+
+        except IndexError:
+            raise StopIteration()
+        return layer
 
 # resnet18 = ResNet(BasicBlock, [2, 2, 2, 2])
 
