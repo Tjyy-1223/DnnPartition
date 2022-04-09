@@ -1,5 +1,9 @@
 import a1_alexNet
-import socket_function
+import a2_vggNet
+import a3_GoogLeNet
+import a4_ResNet
+import a5_MobileNet
+
 import torch
 import time
 import socket
@@ -94,6 +98,27 @@ def recordTimeCpu(model, x, device, epoch):
     return res_x, all_time * 1000
 
 
+def getDnnModel(index):
+    if index == 1:
+        alexnet = a1_alexNet.AlexNet(input_layer=3, num_classes=1000)
+        return alexnet
+    elif index == 2:
+        vgg16 = a2_vggNet.vgg16_bn()
+        return vgg16
+    elif index == 3:
+        GoogLeNet = a3_GoogLeNet.GoogLeNet()
+        return GoogLeNet
+    elif index == 4:
+        resnet18 = a4_ResNet.resnet18()
+        return resnet18
+    elif index == 5:
+        mobileNet = a5_MobileNet.mobilenet_v2()
+        return mobileNet
+    else:
+        print("no model")
+        return None
+
+
 def startServer(ip,port):
     # 初始化一个 socket连接
     p = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -107,7 +132,7 @@ def startServer(ip,port):
 
 
 def startListening(model,p,device,epoch):
-    for point_index in range(len(AlexNet) + 1):
+    for point_index in range(len(model) + 1):
         _, cloud_model = function.model_partition(model, point_index)
         # print(next(cloud_model.parameters()).device)
 
@@ -183,26 +208,46 @@ def startListening(model,p,device,epoch):
 
 
 if __name__ == '__main__':
+    """
+        Params:
+        1 modelIndex 挑选第几个model
+        2 ip 服务端的IP地址
+        3 port 服务端绑定的端口地址
+        4 epoch 测量GPU/CPU 计算epoch次取平均值
+        5 device 目前使用的设备
+    """
+    modelIndex = 1
+    ip = "127.0.0.1"
+    port = 8090
+    epoch = 10
     device = "cuda" if torch.cuda.is_available() else "cpu"
 
-    AlexNet = a1_alexNet.AlexNet(input_layer=3, num_classes=1000)
-    AlexNet = AlexNet.to(device)
+    """
+        Step1 根据modelIndex取出myModel类型
+    """
+    myModel = getDnnModel(modelIndex)
+    myModel = myModel.to(device)
 
+    """
+        Step2 准备Input数据 后续若有真实数据可以在这里替换
+    """
     x = torch.rand(size=(1, 3, 224, 224), requires_grad=False)
     x = x.to(device)
     print(f"x device : {x.device}")
 
+    """
+        Step3 GPU/CPU预热
+    """
     if device == "cuda":
-        warmUpGpu(AlexNet, x, device)
+        warmUpGpu(myModel, x, device)
     elif device == "cpu":
-        warmUpCpu(AlexNet, x, device)
+        warmUpCpu(myModel, x, device)
 
-    ip = "127.0.0.1"
-    port = 8090
+    """
+        Step4 绑定的端口启动Socket 并且开始监听
+    """
     p = startServer(ip,port)
-
-    epoch = 300
-    startListening(AlexNet,p,device,epoch)
+    startListening(myModel,p,device,epoch)
 
 
 

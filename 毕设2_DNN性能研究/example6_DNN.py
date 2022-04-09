@@ -36,12 +36,14 @@ if __name__ == '__main__':
     x = x.to(device)
     print(f"x device : {x.device}")
 
-    model = getDnnModel(1)
+    modelIndex = 1
+    model = getDnnModel(modelIndex)
     model.to(device)
     print(len(model))
 
     temp_x = x
+    epoch = 300
     if device == "cpu":
-        x = function.show_features_cpu(model, x, epoch=3)
+        x = function.show_features_cpu(model, x, epoch=epoch)
     elif device == "cuda":
-        x = function.show_features_gpu(model, x, epoch=10)
+        x = function.show_features_gpu(model, x, epoch=epoch)
