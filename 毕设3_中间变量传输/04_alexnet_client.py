@@ -9,6 +9,7 @@ import time
 import socket
 import pickle
 import function
+import torch.nn as nn
 
 
 def warmUpGpu(model,x,device):
@@ -119,7 +120,13 @@ def getDnnModel(index):
 
 
 def startClient(model,x,device,ip,port,epoch):
+    index = 0
     for point_index in range(len(model) + 1):
+        if point_index > 0:
+            layer = model[point_index-1]
+            if isinstance(layer, nn.ReLU) or isinstance(layer, nn.BatchNorm2d) or isinstance(layer, nn.Dropout):
+                continue
+
         # 创建socket
         p = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         # 请求连接
@@ -135,7 +142,7 @@ def startClient(model,x,device,ip,port,epoch):
         elif device == "cpu":
             edge_x,edge_time = recordTimeCpu(edge_model, x, device, epoch)
 
-        print(f"从第{point_index}层进行划分\t边缘端计算用时 : {edge_time :.3f} ms")
+        print(f"从第{index}层进行划分\t边缘端计算用时 : {edge_time :.3f} ms")
 
         """
             step2 发送边缘端的计算时延
@@ -173,6 +180,7 @@ def startClient(model,x,device,ip,port,epoch):
 
         print("====================================")
         p.close()
+        index += 1
 
 
 if __name__ == '__main__':
@@ -184,10 +192,10 @@ if __name__ == '__main__':
         4 epoch 测量GPU/CPU 计算epoch次取平均值
         5 device 目前使用的设备
     """
-    modelIndex = 2
+    modelIndex = 1
     ip = "127.0.0.1"
     port = 8090
-    epoch = 10
+    epoch = 300
     device = "cuda" if torch.cuda.is_available() else "cpu"
 
 

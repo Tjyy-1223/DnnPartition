@@ -9,6 +9,7 @@ import time
 import socket
 import pickle
 import function
+import torch.nn as nn
 
 
 def warmUpGpu(model,x,device):
@@ -132,7 +133,15 @@ def startServer(ip,port):
 
 
 def startListening(model,p,device,epoch):
+    index = 0
     for point_index in range(len(model) + 1):
+        layer = None
+        if point_index > 0:
+            layer = model[point_index-1]
+            if isinstance(layer, nn.ReLU) or isinstance(layer, nn.BatchNorm2d) or isinstance(layer, nn.Dropout):
+                continue
+
+
         _, cloud_model = function.model_partition(model, point_index)
         # print(next(cloud_model.parameters()).device)
 
@@ -145,7 +154,7 @@ def startListening(model,p,device,epoch):
             step1 接收边缘端的计算时延
         """
         edge_time = pickle.loads(conn.recv(1024))
-        print(f"从第{point_index}层进行划分\t边缘端计算用时 : {edge_time :.3f} ms")
+        print(f"从第{index}层进行划分\t边缘端计算用时 : {edge_time :.3f} ms")
         edge_resp = "yes".encode("UTF-8")
         conn.send(edge_resp)
 
@@ -197,13 +206,14 @@ def startListening(model,p,device,epoch):
         elif device == "cpu":
             _,server_time = recordTimeCpu(cloud_model, parse_data, device, epoch)
 
-        print(f"从第{point_index}层进行划分\t云端计算用时 : {server_time :.3f} ms")
-        print(f"从第{point_index}层进行划分\t云边协同计算用时 : {(edge_time + transport_time + server_time):.3f} ms")
+        print(f"从第{index}层进行划分\t云端计算用时 : {server_time :.3f} ms")
+        print(f"从第{index}-{layer}层进行划分\t云边协同计算用时 : {(edge_time + transport_time + server_time):.3f} ms")
         print("==============================================")
 
         conn.sendall("yes".encode("UTF-8"))
         # 关闭连接
         conn.close()
+        index += 1
     p.close()
 
 
@@ -216,10 +226,10 @@ if __name__ == '__main__':
         4 epoch 测量GPU/CPU 计算epoch次取平均值
         5 device 目前使用的设备
     """
-    modelIndex = 2
+    modelIndex = 1
     ip = "127.0.0.1"
     port = 8090
-    epoch = 10
+    epoch = 300
     device = "cuda" if torch.cuda.is_available() else "cpu"
 
     """
