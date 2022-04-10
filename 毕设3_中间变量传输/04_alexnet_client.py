@@ -147,7 +147,7 @@ def startClient(model,x,device,ip,port,epoch):
         """
             step2 发送边缘端的计算时延
         """
-        p.send(pickle.dumps(edge_time))
+        p.sendall(pickle.dumps(edge_time))
         edge_resp = p.recv(1024).decode("utf-8")
         print(f"get {edge_resp} 边缘端计算时延 发送成功")
 
@@ -155,7 +155,15 @@ def startClient(model,x,device,ip,port,epoch):
             step3 发送边缘端计算后的中间数据
         """
         edge_x = pickle.dumps(edge_x)
-        print(f'client data length {len(edge_x)}')
+        edge_x_length = len(edge_x)
+        print(f'client data length {edge_x_length}')
+
+        # 发送数据长度 告诉服务端有多少数据需要发送
+        p.sendall(pickle.dumps(edge_x_length))
+        resp_length = p.recv(1024).decode("UTF-8")
+        print(f"{resp_length} server 已经收到要发送的数据长度")
+
+
         p.sendall(edge_x)
         # 收到第一次信号 说明已经接收到了传过去的edge_x数据
         edge_resp2 = p.recv(1024).decode("utf-8")
@@ -195,7 +203,7 @@ if __name__ == '__main__':
     """
     modelIndex = 1
     # ip = "127.0.0.1"
-    ip = "122.96.110.67"
+    ip = "112.86.199.171"
     port = 8090
     epoch = 300
     device = "cuda" if torch.cuda.is_available() else "cpu"
