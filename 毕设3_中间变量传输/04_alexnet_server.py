@@ -147,7 +147,7 @@ def startListening(model,p,device,epoch):
 
         # 等待客户端链接
         conn, client = p.accept()
-        # print(f"successfully connection :{conn}")
+        print(f"successfully connection :{conn}\n")
         # 收发消息
 
         """
@@ -172,6 +172,7 @@ def startListening(model,p,device,epoch):
             data.append(packet)
             idx += 1
             if len(packet) < 1024: break
+        print(len(b"".join(data)))
         parse_data = pickle.loads(b"".join(data))
         end_time = time.perf_counter()
 
