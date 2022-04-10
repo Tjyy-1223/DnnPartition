@@ -147,13 +147,14 @@ def startListening(model,p,device,epoch):
 
         # 等待客户端链接
         conn, client = p.accept()
-        print(f"successfully connection :{conn}")
+        # print(f"successfully connection :{conn}")
         # 收发消息
 
         """
             step1 接收边缘端的计算时延
         """
         edge_time = pickle.loads(conn.recv(1024))
+        print(layer)
         print(f"从第{index}层进行划分\t边缘端计算用时 : {edge_time :.3f} ms")
         edge_resp = "yes".encode("UTF-8")
         conn.send(edge_resp)
@@ -207,7 +208,7 @@ def startListening(model,p,device,epoch):
             _,server_time = recordTimeCpu(cloud_model, parse_data, device, epoch)
 
         print(f"从第{index}层进行划分\t云端计算用时 : {server_time :.3f} ms")
-        print(f"从第{index}-{layer}层进行划分\t云边协同计算用时 : {(edge_time + transport_time + server_time):.3f} ms")
+        print(f"从第{index}层进行划分\t云边协同计算用时 : {(edge_time + transport_time + server_time):.3f} ms")
         print("==============================================")
 
         conn.sendall("yes".encode("UTF-8"))
