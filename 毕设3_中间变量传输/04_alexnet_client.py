@@ -193,7 +193,8 @@ if __name__ == '__main__':
         5 device 目前使用的设备
     """
     modelIndex = 1
-    ip = "127.0.0.1"
+    # ip = "127.0.0.1"
+    ip = "122.96.101.2"
     port = 8090
     epoch = 300
     device = "cuda" if torch.cuda.is_available() else "cpu"
