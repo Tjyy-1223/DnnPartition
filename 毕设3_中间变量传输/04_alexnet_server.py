@@ -162,29 +162,25 @@ def startListening(model,p,device,epoch):
         """
             step2 接收边缘端的中间数据
         """
-        idx = 0
-        start_time = 0.0
+        # 接收客户端发送来的数据长度
+        edge_x_length = pickle.loads(conn.recv(1024))
+        print(f"client 即将发送的edge_x的数据长度 {edge_x_length}")
+        resp_length = "getLength".encode("UTF-8")
+        conn.sendall(resp_length)
 
-        data = [conn.recv(1024)]  # 一开始的部分,用于等待传输开始,避免接收不到的情况.
+        data = [conn.recv(4096)]  # 一开始的部分,用于等待传输开始,避免接收不到的情况.
         start_time = time.perf_counter()
         if data[0] in (0, -1):  # 返回0,-1代表出错
             return False
-        conn.setblocking(0)
         while True:
-            try:
-                packet = conn.recv(1024)
-                # if idx == 0:
-
-                data.append(packet)
-                # idx += 1
-            except BlockingIOError as e:
+            packet = conn.recv(4096)
+            data.append(packet)
+            if len(b"".join(data)) >= edge_x_length:
                 break
-        conn.setblocking(1)
         end_time = time.perf_counter()
+
         print(f'server data length {len(b"".join(data))}')
         parse_data = pickle.loads(b"".join(data))
-
-
 
         """
             step3 打印传输中间数据所用的时间
@@ -239,7 +235,7 @@ if __name__ == '__main__':
     """
     modelIndex = 1
     # ip = "127.0.0.1"
-    ip = "122.96.110.67"
+    ip = "112.86.199.171"
     port = 8090
     epoch = 300
     device = "cuda" if torch.cuda.is_available() else "cpu"
