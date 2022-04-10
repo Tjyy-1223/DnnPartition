@@ -155,6 +155,7 @@ def startClient(model,x,device,ip,port,epoch):
             step3 发送边缘端计算后的中间数据
         """
         edge_x = pickle.dumps(edge_x)
+        print(len(edge_x))
         p.sendall(edge_x)
         # 收到第一次信号 说明已经接收到了传过去的edge_x数据
         edge_resp2 = p.recv(1024).decode("utf-8")
