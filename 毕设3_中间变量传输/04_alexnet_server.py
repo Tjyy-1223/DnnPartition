@@ -162,19 +162,28 @@ def startListening(model,p,device,epoch):
         """
             step2 接收边缘端的中间数据
         """
-        data = []
         idx = 0
-        start_time = 0
+        start_time = 0.0
+
+        data = [conn.recv(1024)]  # 一开始的部分,用于等待传输开始,避免接收不到的情况.
+        start_time = time.perf_counter()
+        if data[0] in (0, -1):  # 返回0,-1代表出错
+            return False
+        conn.setblocking(0)
         while True:
-            packet = conn.recv(1024)
-            if idx == 0:
-                start_time = time.perf_counter()
-            data.append(packet)
-            idx += 1
-            if len(packet) < 1024: break
-        print(len(b"".join(data)))
-        parse_data = pickle.loads(b"".join(data))
+            try:
+                packet = conn.recv(1024)
+                # if idx == 0:
+
+                data.append(packet)
+                # idx += 1
+            except BlockingIOError as e:
+                break
+        conn.setblocking(1)
         end_time = time.perf_counter()
+        print(f'server data length {len(b"".join(data))}')
+        parse_data = pickle.loads(b"".join(data))
+
 
 
         """
