@@ -244,7 +244,7 @@ if __name__ == '__main__':
     """
     modelIndex = 5
     # ip = "127.0.0.1"
-    ip = "112.86.199.171"
+    ip = "122.192.45.170"
     port = 8090
     epoch = 300
     device = "cuda" if torch.cuda.is_available() else "cpu"
