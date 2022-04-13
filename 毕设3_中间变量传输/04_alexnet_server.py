@@ -132,7 +132,9 @@ def startServer(ip,port):
     return p
 
 
-def startListening(model,p,device,epoch):
+def startListening(model,p,device,epoch,save = False,model_name="model"):
+    path = "../res/localhost.xls"
+    sheet_name = model_name
     index = 0
     for point_index in range(len(model) + 1):
         layer = None
@@ -214,7 +216,14 @@ def startListening(model,p,device,epoch):
             _,server_time = recordTimeCpu(cloud_model, parse_data, device, epoch)
 
         print(f"从第{index}层进行划分\t云端计算用时 : {server_time :.3f} ms")
-        print(f"从第{index}层进行划分\t云边协同计算用时 : {(edge_time + transport_time + server_time):.3f} ms")
+        end2end_time = edge_time + transport_time + server_time
+        print(f"从第{index}层进行划分\t云边协同计算用时 : {end2end_time:.3f} ms")
+
+
+        # value = [["index", "layerName", "shape", "transport_latency", "edge_latency", "cloud_latency", "end-to-end latency"]]
+        value = [[index,f"{layer}",f"{parse_data.shape}",edge_x_length,round(transport_time,3),round(edge_time,3),round(server_time,3),round(end2end_time,3)]]
+        function.write_excel_xls_append(path,sheet_name,value)
+
         print("==============================================")
 
         conn.sendall("yes".encode("UTF-8"))
@@ -233,7 +242,7 @@ if __name__ == '__main__':
         4 epoch 测量GPU/CPU 计算epoch次取平均值
         5 device 目前使用的设备
     """
-    modelIndex = 3
+    modelIndex = 4
     ip = "127.0.0.1"
     # ip = "112.86.199.171"
     port = 8090
@@ -264,8 +273,17 @@ if __name__ == '__main__':
     """
         Step4 绑定的端口启动Socket 并且开始监听
     """
+    model_names = ["alexnet", "vgg16", "googLeNet", "resnet18", "mobileNetv2"]
+    model_name = model_names[modelIndex - 1]
+
+    path = "../res/localhost.xls"
+    sheet_name = model_name
+    value = [["index","layerName","shape","edgex_length","transport_latency","edge_latency","cloud_latency","end-to-end latency"]]
+    function.create_excel_xsl(path,sheet_name,value)
+
+    save_flag = False
     p = startServer(ip,port)
-    startListening(myModel,p,device,epoch)
+    startListening(myModel,p,device,epoch,save_flag,model_name=model_name)
 
 
 
