@@ -201,7 +201,7 @@ if __name__ == '__main__':
         4 epoch 测量GPU/CPU 计算epoch次取平均值
         5 device 目前使用的设备
     """
-    modelIndex = 4
+    modelIndex = 5
     ip = "127.0.0.1"
     # ip = "112.86.199.171"
     port = 8090

@@ -170,7 +170,7 @@ def startListening(model,p,device,epoch,save = False,model_name="model"):
         resp_length = "getLength".encode("UTF-8")
         conn.sendall(resp_length)
 
-        data = [conn.recv(4096)]  # 一开始的部分,用于等待传输开始,避免接收不到的情况.
+        data = [conn.recv(128)]  # 一开始的部分,用于等待传输开始,避免接收不到的情况.
         start_time = time.perf_counter()
         if data[0] in (0, -1):  # 返回0,-1代表出错
             return False
@@ -242,7 +242,7 @@ if __name__ == '__main__':
         4 epoch 测量GPU/CPU 计算epoch次取平均值
         5 device 目前使用的设备
     """
-    modelIndex = 4
+    modelIndex = 5
     ip = "127.0.0.1"
     # ip = "112.86.199.171"
     port = 8090
