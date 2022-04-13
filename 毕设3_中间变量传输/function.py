@@ -2,6 +2,9 @@ import torch
 import torch.nn as nn
 import time
 import threading
+import xlrd
+import xlwt
+from xlutils.copy import copy
 
 """
 model_partition函数可以将一个整体的model 划分成两个部分
@@ -41,7 +44,7 @@ def model_partition(alexnet, index):
     最后返回运行结果x
     修改：省略了 激活层 batchnormal层 以及 dropout层
 """
-def show_features_gpu(alexnet, x ,filter = True,epoch = 3):
+def show_features_gpu(alexnet, x ,filter = True,epoch = 3,save = False,model_name = "model"):
 
     device = "cuda" if torch.cuda.is_available() else "cpu"
 
@@ -67,6 +70,12 @@ def show_features_gpu(alexnet, x ,filter = True,epoch = 3):
 
             print(f"GPU warm-up - {i+1}")
             print(f'computation time: {curr_time :.3f} ms\n')
+
+    if save:
+        path = "../res/DnnLayer.xls"
+        sheet_name = model_name
+        value = [["index", "layerName","computation_time(ms)","output_shape","transport_num","transport_size(MB)"]]
+        create_excel_xsl(path,sheet_name,value)
 
     if len(alexnet) > 0:
         idx = 1
@@ -102,6 +111,11 @@ def show_features_gpu(alexnet, x ,filter = True,epoch = 3):
                   f'computation time: {(all_time/epoch):.3f} ms\n'
                   f'output shape: {x.shape}\t transport_num:{total_num}    transport_size:{size:.3f}MB')
 
+            if save:
+                path = "../res/DnnLayer.xls"
+                sheet_name = model_name
+                value = [[idx, f"{layer}", round((all_time / epoch), 3), f"{x.shape}", total_num,round(size, 3)]]
+                write_excel_xls_append(path,sheet_name,value)
             # 计算各层的结构所包含的参数量 主要与计算时延相关
             # para = parameters.numel()
             # for name, parameters in layer.named_parameters():
@@ -125,7 +139,7 @@ def show_features_gpu(alexnet, x ,filter = True,epoch = 3):
     最后返回运行结果x
     修改：省略了 激活层 batchnormal层 以及 dropout层
 """
-def show_features_cpu(alexnet, x ,filter = True,epoch = 3):
+def show_features_cpu(alexnet, x ,filter = True,epoch = 3,save = False,model_name = "model"):
 
     device = "cuda" if torch.cuda.is_available() else "cpu"
 
@@ -142,6 +156,12 @@ def show_features_cpu(alexnet, x ,filter = True,epoch = 3):
 
             print(f"CPU warm-up - {i+1}")
             print(f'computation time: {curr_time*1000 :.3f} ms\n')
+
+    if save:
+        path = "../res/DnnLayer.xls"
+        sheet_name = model_name
+        value = [["index", "layerName","computation_time(ms)","output_shape","transport_num","transport_size(MB)"]]
+        create_excel_xsl(path,sheet_name,value)
 
     if len(alexnet) > 0:
         idx = 1
@@ -173,6 +193,12 @@ def show_features_cpu(alexnet, x ,filter = True,epoch = 3):
             print(f'{idx}-{layer} \n'
                   f'computation time: {(all_time/epoch)*1000:.3f} ms\n'
                   f'output shape: {x.shape}\t transport_num:{total_num}    transport_size:{size:.3f}MB')
+
+            if save:
+                path = "../res/DnnLayer.xls"
+                sheet_name = model_name
+                value = [[idx,f"{layer}",round((all_time/epoch)*1000,3),f"{x.shape}",total_num,round(size,3)]]
+                write_excel_xls_append(path,sheet_name,value)
 
             # 计算各层的结构所包含的参数量 主要与计算时延相关
             # para = parameters.numel()
@@ -207,4 +233,68 @@ def show_1model(model,filter = True):
             idx += 1
     else:
         print("this model is a empty model")
+
+
+
+"""
+    设计一个函数，将结果保存在excel表中，excel的名字需要自己能够命名
+
+"""
+def create_excel_xsl(path,sheet_name,value):
+    index = len(value)
+    try:
+        with xlrd.open_workbook(path) as workbook:
+            workbook = copy(workbook)
+            # worksheet = workbook.sheet_by_name(sheet_name)
+            worksheet = workbook.add_sheet(sheet_name)  # 在工作簿中新建一个表格
+            for i in range(len(value[0])):
+                worksheet.col(i).width = 256*30  # Set the column width
+            for i in range(0, index):
+                for j in range(0, len(value[i])):
+                    worksheet.write(i, j, value[i][j])
+            workbook.save(path)
+            print("xls格式表格创建成功")
+    except FileNotFoundError:
+        workbook = xlwt.Workbook()  # 新建一个工作簿
+        worksheet = workbook.add_sheet(sheet_name)  # 在工作簿中新建一个表格
+        for i in range(len(value[0])):
+            worksheet.col(i).width = 256 * 30  # Set the column width
+        for i in range(0, index):
+            for j in range(0, len(value[i])):
+                worksheet.write(i, j, value[i][j])
+        workbook.save(path)
+        print("xls格式表格创建成功")
+
+
+def write_excel_xls_append(path,sheet_name,value):
+    index = len(value)
+    workbook = xlrd.open_workbook(path)
+    worksheet = workbook.sheet_by_name(sheet_name)
+
+    rows_old = worksheet.nrows  # 获取表格中已存在的数据的行数
+    new_workbook = copy(workbook)  # 将xlrd对象拷贝转化为xlwt对象
+    new_worksheet = new_workbook.get_sheet(sheet_name)
+
+    for i in range(len(value[0])):
+        new_worksheet.col(i).width = 256 * 30  # Set the column width
+
+    for i in range(0,index):
+        for j in range(0,len(value[i])):
+            new_worksheet.write(i+rows_old, j, value[i][j])
+
+    new_workbook.save(path)  # 保存工作簿
+    print("xls格式表格【追加】写入数据成功！")
+
+
+def read_excel_xls(path,sheet_name):
+    workbook = xlrd.open_workbook(path)  # 打开工作簿
+    worksheet = workbook.sheet_by_name(sheet_name)  # 获取工作簿中的所有表格
+    for i in range(0, worksheet.nrows):
+        for j in range(0, worksheet.ncols):
+            print(worksheet.cell_value(i, j), "\t", end="")  # 逐行逐列读取数据
+        print()
+
+
+
+
 
