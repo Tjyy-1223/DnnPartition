@@ -133,7 +133,7 @@ def startServer(ip,port):
 
 
 def startListening(model,p,device,epoch,save = False,model_name="model"):
-    path = "../res/localhost.xls"
+    path = "../res/cpu_gpu.xls"
     sheet_name = model_name
     index = 0
     for point_index in range(len(model) + 1):
@@ -243,8 +243,8 @@ if __name__ == '__main__':
         5 device 目前使用的设备
     """
     modelIndex = 5
-    ip = "127.0.0.1"
-    # ip = "112.86.199.171"
+    # ip = "127.0.0.1"
+    ip = "112.86.199.171"
     port = 8090
     epoch = 300
     device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -276,7 +276,7 @@ if __name__ == '__main__':
     model_names = ["alexnet", "vgg16", "googLeNet", "resnet18", "mobileNetv2"]
     model_name = model_names[modelIndex - 1]
 
-    path = "../res/localhost.xls"
+    path = "../res/cpu_gpu.xls"
     sheet_name = model_name
     value = [["index","layerName","shape","edgex_length","transport_latency","edge_latency","cloud_latency","end-to-end latency"]]
     function.create_excel_xsl(path,sheet_name,value)
