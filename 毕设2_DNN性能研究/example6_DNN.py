@@ -28,6 +28,7 @@ def getDnnModel(index):
         return None
 
 
+
 if __name__ == '__main__':
     device = "cuda" if torch.cuda.is_available() else "cpu"
     print(device)
@@ -36,14 +37,17 @@ if __name__ == '__main__':
     x = x.to(device)
     print(f"x device : {x.device}")
 
-    modelIndex = 1
+    modelIndex = 5
+    model_names = ["alexnet","vgg16","googLeNet","resnet18","mobileNetv2"]
+    model_name = model_names[modelIndex-1]
     model = getDnnModel(modelIndex)
     model.to(device)
     print(len(model))
 
     temp_x = x
     epoch = 300
+    save_flag = False
     if device == "cpu":
-        x = function.show_features_cpu(model, x, epoch=epoch)
+        x = function.show_features_cpu(model, x, epoch=epoch,save=save_flag,model_name=model_name)
     elif device == "cuda":
-        x = function.show_features_gpu(model, x, epoch=epoch)
+        x = function.show_features_gpu(model, x, epoch=epoch,save=save_flag,model_name=model_name)
