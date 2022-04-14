@@ -30,7 +30,8 @@ def getDnnModel(index):
 
 
 if __name__ == '__main__':
-    device = "cuda" if torch.cuda.is_available() else "cpu"
+    # device = "cuda" if torch.cuda.is_available() else "cpu"
+    device = "cpu"
     print(device)
 
     x = torch.rand(size=(1, 3, 224, 224))
@@ -47,7 +48,8 @@ if __name__ == '__main__':
     temp_x = x
     epoch = 300
     save_flag = False
+    path = "../res/DnnLayer_cpu.xls"
     if device == "cpu":
-        x = function.show_features_cpu(model, x, epoch=epoch,save=save_flag,model_name=model_name)
+        x = function.show_features_cpu(model, x, epoch=epoch,save=save_flag,model_name=model_name,path=path)
     elif device == "cuda":
-        x = function.show_features_gpu(model, x, epoch=epoch,save=save_flag,model_name=model_name)
+        x = function.show_features_gpu(model, x, epoch=epoch,save=save_flag,model_name=model_name,path=path)

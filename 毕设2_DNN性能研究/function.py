@@ -44,7 +44,7 @@ def model_partition(alexnet, index):
     最后返回运行结果x
     修改：省略了 激活层 batchnormal层 以及 dropout层
 """
-def show_features_gpu(alexnet, x ,filter = True,epoch = 3,save = False,model_name = "model"):
+def show_features_gpu(alexnet, x ,filter = True,epoch = 3,save = False,model_name = "model",path = None):
 
     device = "cuda" if torch.cuda.is_available() else "cpu"
 
@@ -72,7 +72,6 @@ def show_features_gpu(alexnet, x ,filter = True,epoch = 3,save = False,model_nam
             print(f'computation time: {curr_time :.3f} ms\n')
 
     if save:
-        path = "../res/DnnLayer.xls"
         sheet_name = model_name
         value = [["index", "layerName","computation_time(ms)","output_shape","transport_num","transport_size(MB)"]]
         create_excel_xsl(path,sheet_name,value)
@@ -112,7 +111,6 @@ def show_features_gpu(alexnet, x ,filter = True,epoch = 3,save = False,model_nam
                   f'output shape: {x.shape}\t transport_num:{total_num}    transport_size:{size:.3f}MB')
 
             if save:
-                path = "../res/DnnLayer.xls"
                 sheet_name = model_name
                 value = [[idx, f"{layer}", round((all_time / epoch), 3), f"{x.shape}", total_num,round(size, 3)]]
                 write_excel_xls_append(path,sheet_name,value)
@@ -139,9 +137,10 @@ def show_features_gpu(alexnet, x ,filter = True,epoch = 3,save = False,model_nam
     最后返回运行结果x
     修改：省略了 激活层 batchnormal层 以及 dropout层
 """
-def show_features_cpu(alexnet, x ,filter = True,epoch = 3,save = False,model_name = "model"):
+def show_features_cpu(alexnet, x ,filter = True,epoch = 3,save = False,model_name = "model",path = None):
 
-    device = "cuda" if torch.cuda.is_available() else "cpu"
+    # device = "cuda" if torch.cuda.is_available() else "cpu"
+    device = "cpu"
 
     # GPU warm-up and prevent it from going into power-saving mode
     dummy_input = torch.rand(x.shape).to(device)
@@ -158,7 +157,6 @@ def show_features_cpu(alexnet, x ,filter = True,epoch = 3,save = False,model_nam
             print(f'computation time: {curr_time*1000 :.3f} ms\n')
 
     if save:
-        path = "../res/DnnLayer.xls"
         sheet_name = model_name
         value = [["index", "layerName","computation_time(ms)","output_shape","transport_num","transport_size(MB)"]]
         create_excel_xsl(path,sheet_name,value)
@@ -195,7 +193,6 @@ def show_features_cpu(alexnet, x ,filter = True,epoch = 3,save = False,model_nam
                   f'output shape: {x.shape}\t transport_num:{total_num}    transport_size:{size:.3f}MB')
 
             if save:
-                path = "../res/DnnLayer.xls"
                 sheet_name = model_name
                 value = [[idx,f"{layer}",round((all_time/epoch)*1000,3),f"{x.shape}",total_num,round(size,3)]]
                 write_excel_xls_append(path,sheet_name,value)
