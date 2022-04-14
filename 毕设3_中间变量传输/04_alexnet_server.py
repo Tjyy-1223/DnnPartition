@@ -132,8 +132,7 @@ def startServer(ip,port):
     return p
 
 
-def startListening(model,p,device,epoch,save = False,model_name="model"):
-    path = "../res/cpu_gpu.xls"
+def startListening(model,p,device,epoch,save = False,model_name="model",path = None):
     sheet_name = model_name
     index = 0
     for point_index in range(len(model) + 1):
@@ -196,7 +195,6 @@ def startListening(model,p,device,epoch,save = False,model_name="model"):
         print(f"client data: {parse_data.shape}")
         parse_data.requires_grad = False
 
-        """ 这里 parse data 不用加to device：因为传过来的数据默认在cuda0上了"""
         parse_data = parse_data.to(device)
         # print(parse_data.device)
 
@@ -242,9 +240,9 @@ if __name__ == '__main__':
         4 epoch 测量GPU/CPU 计算epoch次取平均值
         5 device 目前使用的设备
     """
-    modelIndex = 5
-    # ip = "127.0.0.1"
-    ip = "122.192.45.170"
+    modelIndex = 1
+    ip = "127.0.0.1"
+    # ip = "122.192.45.170"
     port = 8090
     epoch = 300
     device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -276,14 +274,14 @@ if __name__ == '__main__':
     model_names = ["alexnet", "vgg16", "googLeNet", "resnet18", "mobileNetv2"]
     model_name = model_names[modelIndex - 1]
 
-    path = "../res/cpu_gpu.xls"
+    path = "../res/cpu_gpu_tooFast.xls"
     sheet_name = model_name
     value = [["index","layerName","shape","edgex_length","transport_latency","edge_latency","cloud_latency","end-to-end latency"]]
     function.create_excel_xsl(path,sheet_name,value)
 
-    save_flag = False
+    save_flag = True
     p = startServer(ip,port)
-    startListening(myModel,p,device,epoch,save_flag,model_name=model_name)
+    startListening(myModel,p,device,epoch,save_flag,model_name=model_name,path=path)
 
 
 

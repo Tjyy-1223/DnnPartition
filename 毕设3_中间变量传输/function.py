@@ -27,9 +27,9 @@ def model_partition(alexnet, index):
         else:
             cloud_model.add_module(f"{idx}-{layer.__class__.__name__}", layer)
         idx += 1
-    device = "cuda" if torch.cuda.is_available() else "cpu"
-    edge_model = edge_model.to(device)
-    cloud_model = cloud_model.to(device)
+    # device = "cuda" if torch.cuda.is_available() else "cpu"
+    # edge_model = edge_model.to(device)
+    # cloud_model = cloud_model.to(device)
     return edge_model, cloud_model
 
 

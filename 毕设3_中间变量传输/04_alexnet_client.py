@@ -133,6 +133,7 @@ def startClient(model,x,device,ip,port,epoch):
         p.connect((ip,port))
 
         edge_model, _ = function.model_partition(model, point_index)
+        edge_model = edge_model.to(device)
 
         """
             step1 记录边缘端的计算用时
@@ -201,12 +202,13 @@ if __name__ == '__main__':
         4 epoch 测量GPU/CPU 计算epoch次取平均值
         5 device 目前使用的设备
     """
-    modelIndex = 5
-    # ip = "127.0.0.1"
-    ip = "112.86.199.171"
+    modelIndex = 1
+    ip = "127.0.0.1"
+    # ip = "112.86.199.171"
     port = 8090
     epoch = 300
-    device = "cuda" if torch.cuda.is_available() else "cpu"
+    device = "cpu"
+    # device = "cuda" if torch.cuda.is_available() else "cpu"
 
 
     """
