@@ -6,6 +6,13 @@ import xlrd
 import xlwt
 from xlutils.copy import copy
 
+import a1_alexNet
+import a2_vggNet
+import a3_GoogLeNet
+import a4_ResNet
+import a5_MobileNet
+
+
 """
 model_partition函数可以将一个整体的model 划分成两个部分
     划分的大致思路：
@@ -27,9 +34,9 @@ def model_partition(alexnet, index):
         else:
             cloud_model.add_module(f"{idx}-{layer.__class__.__name__}", layer)
         idx += 1
-    device = "cuda" if torch.cuda.is_available() else "cpu"
-    edge_model = edge_model.to(device)
-    cloud_model = cloud_model.to(device)
+    # device = "cuda" if torch.cuda.is_available() else "cpu"
+    # edge_model = edge_model.to(device)
+    # cloud_model = cloud_model.to(device)
     return edge_model, cloud_model
 
 
@@ -293,5 +300,125 @@ def read_excel_xls(path,sheet_name):
 
 
 
+"""
+    GPU预热操作
+"""
+def warmUpGpu(model,x,device):
+    # GPU warm-up and prevent it from going into power-saving mode
+    dummy_input = torch.rand(x.shape).to(device)
+
+    # GPU warm-up
+    with torch.no_grad():
+        for i in range(3):
+            _ = model(dummy_input)
+
+        avg_time = 0.0
+
+        for i in range(300):
+            starter = torch.cuda.Event(enable_timing=True)
+            ender = torch.cuda.Event(enable_timing=True)
+            starter.record()
+
+            _ = model(dummy_input)
+
+            ender.record()
+            torch.cuda.synchronize()
+            curr_time = starter.elapsed_time(ender)
+            avg_time += curr_time
+        avg_time /= 300
+        print(f"GPU warm-up: {curr_time:.3f}ms")
+        print("==============================================")
 
 
+"""
+    CPU预热操作
+"""
+def warmUpCpu(model,x,device):
+    # GPU warm-up and prevent it from going into power-saving mode
+    dummy_input = torch.rand(x.shape).to(device)
+
+    # GPU warm-up
+    with torch.no_grad():
+        for i in range(3):
+            _ = model(dummy_input)
+
+        avg_time = 0.0
+
+        for i in range(10):
+            start = time.perf_counter()
+            _ = model(dummy_input)
+            end = time.perf_counter()
+            curr_time = end - start
+            avg_time += curr_time
+        avg_time /= 10
+        print(f"CPU warm-up: {curr_time:.3f}ms")
+        print("==============================================")
+
+
+"""
+    记录GPU的用时
+"""
+def recordTimeGpu(model, x, device, epoch):
+    all_time = 0.0
+    for i in range(epoch):
+        x = torch.rand(x.shape).to(device)
+        # init loggers
+        starter = torch.cuda.Event(enable_timing=True)
+        ender = torch.cuda.Event(enable_timing=True)
+
+        with torch.no_grad():
+            starter.record()
+            res_x = model(x)
+            ender.record()
+
+        # wait for GPU SYNC
+        torch.cuda.synchronize()
+        curr_time = starter.elapsed_time(ender)
+        all_time += curr_time
+    all_time /= epoch
+    return res_x, all_time
+
+
+"""
+    记录CPU的用时
+"""
+
+def recordTimeCpu(model, x, device, epoch):
+    all_time = 0.0
+    for i in range(epoch):
+        x = torch.rand(x.shape).to(device)
+
+        with torch.no_grad():
+            start_time = time.perf_counter()
+            res_x = model(x)
+            end_time = time.perf_counter()
+
+        curr_time = end_time - start_time
+        all_time += curr_time
+    all_time /= epoch
+    return res_x, all_time * 1000
+
+
+
+"""
+   获取DNN模型
+"""
+def getDnnModel(index):
+    if index == 1:
+        alexnet = a1_alexNet.AlexNet(input_layer=3, num_classes=1000)
+        return alexnet
+    elif index == 2:
+        vgg16 = a2_vggNet.vgg16_bn()
+        return vgg16
+    elif index == 3:
+        GoogLeNet = a3_GoogLeNet.GoogLeNet()
+        return GoogLeNet
+    elif index == 4:
+        resnet18 = a4_ResNet.resnet18()
+        return resnet18
+    elif index == 5:
+        mobileNet = a5_MobileNet.mobilenet_v2()
+        return mobileNet
+    else:
+        print("no model")
+        return None
