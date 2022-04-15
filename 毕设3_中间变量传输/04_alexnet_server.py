@@ -1,123 +1,9 @@
-import a1_alexNet
-import a2_vggNet
-import a3_GoogLeNet
-import a4_ResNet
-import a5_MobileNet
-
 import torch
 import time
 import socket
 import pickle
 import function
 import torch.nn as nn
-
-
-def warmUpGpu(model,x,device):
-    # GPU warm-up and prevent it from going into power-saving mode
-    dummy_input = torch.rand(x.shape).to(device)
-
-    # GPU warm-up
-    with torch.no_grad():
-        for i in range(3):
-            _ = model(dummy_input)
-
-        avg_time = 0.0
-
-        for i in range(300):
-            starter = torch.cuda.Event(enable_timing=True)
-            ender = torch.cuda.Event(enable_timing=True)
-            starter.record()
-
-            _ = model(dummy_input)
-
-            ender.record()
-            torch.cuda.synchronize()
-            curr_time = starter.elapsed_time(ender)
-            avg_time += curr_time
-        avg_time /= 300
-        print(f"GPU warm-up: {curr_time:.3f}ms")
-        print("==============================================")
-
-
-def warmUpCpu(model,x,device):
-    # GPU warm-up and prevent it from going into power-saving mode
-    dummy_input = torch.rand(x.shape).to(device)
-
-    # GPU warm-up
-    with torch.no_grad():
-        for i in range(3):
-            _ = model(dummy_input)
-
-        avg_time = 0.0
-
-        for i in range(10):
-            start = time.perf_counter()
-            _ = model(dummy_input)
-            end = time.perf_counter()
-
-            curr_time = end - start
-            avg_time += curr_time
-        avg_time /= 10
-        print(f"CPU warm-up: {curr_time:.3f}ms")
-        print("==============================================")
-
-
-def recordTimeGpu(model, x, device, epoch):
-    all_time = 0.0
-    for i in range(epoch):
-        x = torch.rand(x.shape).to(device)
-        # init loggers
-        starter = torch.cuda.Event(enable_timing=True)
-        ender = torch.cuda.Event(enable_timing=True)
-
-        with torch.no_grad():
-            starter.record()
-            res_x = model(x)
-            ender.record()
-
-        # wait for GPU SYNC
-        torch.cuda.synchronize()
-        curr_time = starter.elapsed_time(ender)
-        all_time += curr_time
-    all_time /= epoch
-    return res_x, all_time
-
-
-def recordTimeCpu(model, x, device, epoch):
-    all_time = 0.0
-    for i in range(epoch):
-        x = torch.rand(x.shape).to(device)
-
-        with torch.no_grad():
-            start_time = time.perf_counter()
-            res_x = model(x)
-            end_time = time.perf_counter()
-
-        curr_time = end_time - start_time
-        all_time += curr_time
-    all_time /= epoch
-    return res_x, all_time * 1000
-
-
-def getDnnModel(index):
-    if index == 1:
-        alexnet = a1_alexNet.AlexNet(input_layer=3, num_classes=1000)
-        return alexnet
-    elif index == 2:
-        vgg16 = a2_vggNet.vgg16_bn()
-        return vgg16
-    elif index == 3:
-        GoogLeNet = a3_GoogLeNet.GoogLeNet()
-        return GoogLeNet
-    elif index == 4:
-        resnet18 = a4_ResNet.resnet18()
-        return resnet18
-    elif index == 5:
-        mobileNet = a5_MobileNet.mobilenet_v2()
-        return mobileNet
-    else:
-        print("no model")
-        return None
 
 
 def startServer(ip,port):
@@ -209,18 +95,20 @@ def startListening(model,p,device,epoch,save = False,model_name="model",path = N
             step5 记录云端计算用时
         """
         if device == "cuda":
-            _,server_time = recordTimeGpu(cloud_model,parse_data,device,epoch)
+            _,server_time = function.recordTimeGpu(cloud_model,parse_data,device,epoch)
         elif device == "cpu":
-            _,server_time = recordTimeCpu(cloud_model, parse_data, device, epoch)
+            _,server_time = function.recordTimeCpu(cloud_model, parse_data, device, epoch)
 
         print(f"从第{index}层进行划分\t云端计算用时 : {server_time :.3f} ms")
         end2end_time = edge_time + transport_time + server_time
         print(f"从第{index}层进行划分\t云边协同计算用时 : {end2end_time:.3f} ms")
 
 
-        # value = [["index", "layerName", "shape", "transport_latency", "edge_latency", "cloud_latency", "end-to-end latency"]]
-        value = [[index,f"{layer}",f"{parse_data.shape}",edge_x_length,round(transport_time,3),round(edge_time,3),round(server_time,3),round(end2end_time,3)]]
-        function.write_excel_xls_append(path,sheet_name,value)
+        if save_flag:
+            # value = [["index", "layerName", "shape", "transport_latency", "edge_latency", "cloud_latency", "end-to-end latency"]]
+
+            value = [[index,f"{layer}",f"{parse_data.shape}",edge_x_length,round(transport_time,3),round(edge_time,3),round(server_time,3),round(end2end_time,3)]]
+            function.write_excel_xls_append(path,sheet_name,value)
 
         print("==============================================")
 
@@ -241,8 +129,8 @@ if __name__ == '__main__':
         5 device 目前使用的设备
     """
     modelIndex = 5
-    # ip = "127.0.0.1"
-    ip = "112.86.198.187"
+    ip = "127.0.0.1"
+    # ip = "112.86.198.187"
     port = 8090
     epoch = 300
     device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -250,7 +138,7 @@ if __name__ == '__main__':
     """
         Step1 根据modelIndex取出myModel类型
     """
-    myModel = getDnnModel(modelIndex)
+    myModel = function.getDnnModel(modelIndex)
     myModel = myModel.to(device)
 
     """
@@ -264,9 +152,9 @@ if __name__ == '__main__':
         Step3 GPU/CPU预热
     """
     if device == "cuda":
-        warmUpGpu(myModel, x, device)
+        function.warmUpGpu(myModel, x, device)
     elif device == "cpu":
-        warmUpCpu(myModel, x, device)
+        function.warmUpCpu(myModel, x, device)
 
     """
         Step4 绑定的端口启动Socket 并且开始监听
@@ -277,9 +165,10 @@ if __name__ == '__main__':
     path = "../res/cpu_gpu2.xls"
     sheet_name = model_name
     value = [["index","layerName","shape","edgex_length","transport_latency","edge_latency","cloud_latency","end-to-end latency"]]
-    function.create_excel_xsl(path,sheet_name,value)
 
-    save_flag = True
+    save_flag = False
+    if save_flag:
+        function.create_excel_xsl(path,sheet_name,value)
     p = startServer(ip,port)
     startListening(myModel,p,device,epoch,save_flag,model_name=model_name,path=path)
 

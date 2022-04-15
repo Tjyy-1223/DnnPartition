@@ -1,123 +1,9 @@
-import a1_alexNet
-import a2_vggNet
-import a3_GoogLeNet
-import a4_ResNet
-import a5_MobileNet
-
 import torch
 import time
 import socket
 import pickle
 import function
 import torch.nn as nn
-
-
-def warmUpGpu(model,x,device):
-    # GPU warm-up and prevent it from going into power-saving mode
-    dummy_input = torch.rand(x.shape).to(device)
-
-    # GPU warm-up
-    with torch.no_grad():
-        for i in range(3):
-            _ = model(dummy_input)
-
-        avg_time = 0.0
-
-        for i in range(300):
-            starter = torch.cuda.Event(enable_timing=True)
-            ender = torch.cuda.Event(enable_timing=True)
-            starter.record()
-
-            _ = model(dummy_input)
-
-            ender.record()
-            torch.cuda.synchronize()
-            curr_time = starter.elapsed_time(ender)
-            avg_time += curr_time
-        avg_time /= 300
-        print(f"GPU warm-up: {curr_time:.3f}ms")
-        print("==============================================")
-
-
-def warmUpCpu(model,x,device):
-    # GPU warm-up and prevent it from going into power-saving mode
-    dummy_input = torch.rand(x.shape).to(device)
-
-    # GPU warm-up
-    with torch.no_grad():
-        for i in range(3):
-            _ = model(dummy_input)
-
-        avg_time = 0.0
-
-        for i in range(10):
-            start = time.perf_counter()
-            _ = model(dummy_input)
-            end = time.perf_counter()
-            curr_time = end - start
-            avg_time += curr_time
-        avg_time /= 10
-        print(f"CPU warm-up: {curr_time:.3f}ms")
-        print("==============================================")
-
-
-def recordTimeGpu(model, x, device, epoch):
-    all_time = 0.0
-    for i in range(epoch):
-        x = torch.rand(x.shape).to(device)
-        # init loggers
-        starter = torch.cuda.Event(enable_timing=True)
-        ender = torch.cuda.Event(enable_timing=True)
-
-        with torch.no_grad():
-            starter.record()
-            res_x = model(x)
-            ender.record()
-
-        # wait for GPU SYNC
-        torch.cuda.synchronize()
-        curr_time = starter.elapsed_time(ender)
-        all_time += curr_time
-    all_time /= epoch
-    return res_x, all_time
-
-
-def recordTimeCpu(model, x, device, epoch):
-    all_time = 0.0
-    for i in range(epoch):
-        x = torch.rand(x.shape).to(device)
-
-        with torch.no_grad():
-            start_time = time.perf_counter()
-            res_x = model(x)
-            end_time = time.perf_counter()
-
-        curr_time = end_time - start_time
-        all_time += curr_time
-    all_time /= epoch
-    return res_x, all_time * 1000
-
-
-def getDnnModel(index):
-    if index == 1:
-        alexnet = a1_alexNet.AlexNet(input_layer=3, num_classes=1000)
-        return alexnet
-    elif index == 2:
-        vgg16 = a2_vggNet.vgg16_bn()
-        return vgg16
-    elif index == 3:
-        GoogLeNet = a3_GoogLeNet.GoogLeNet()
-        return GoogLeNet
-    elif index == 4:
-        resnet18 = a4_ResNet.resnet18()
-        return resnet18
-    elif index == 5:
-        mobileNet = a5_MobileNet.mobilenet_v2()
-        return mobileNet
-    else:
-        print("no model")
-        return None
-
 
 def startClient(model,x,device,ip,port,epoch):
     index = 0
@@ -139,9 +25,9 @@ def startClient(model,x,device,ip,port,epoch):
             step1 记录边缘端的计算用时
         """
         if device == "cuda":
-            edge_x,edge_time = recordTimeGpu(edge_model,x,device,epoch)
+            edge_x,edge_time = function.recordTimeGpu(edge_model,x,device,epoch)
         elif device == "cpu":
-            edge_x,edge_time = recordTimeCpu(edge_model, x, device, epoch)
+            edge_x,edge_time = function.recordTimeCpu(edge_model, x, device, epoch)
 
         print(f"从第{index}层进行划分\t边缘端计算用时 : {edge_time :.3f} ms")
 
@@ -214,7 +100,7 @@ if __name__ == '__main__':
     """
         Step1 根据modelIndex取出myModel类型
     """
-    myModel = getDnnModel(modelIndex)
+    myModel = function.getDnnModel(modelIndex)
     myModel = myModel.to(device)
 
     """
@@ -228,9 +114,9 @@ if __name__ == '__main__':
         Step3 GPU/CPU预热
     """
     if device == "cuda":
-        warmUpGpu(myModel,x,device)
+        function.warmUpGpu(myModel,x,device)
     elif device == "cpu":
-        warmUpCpu(myModel,x,device)
+        function.warmUpCpu(myModel,x,device)
 
     """
         Step4 绑定的端口启动Socket 并且开始监听
