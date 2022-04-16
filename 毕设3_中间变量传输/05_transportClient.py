@@ -54,8 +54,8 @@ if __name__ == '__main__':
     device = "cuda" if torch.cuda.is_available() else "cpu"
     epoch = 10
 
-    ip = "127.0.0.1"
-    # ip = "112.86.198.187"
+    # ip = "127.0.0.1"
+    ip = "122.96.110.181"
     port = 8090
 
     startClient(device,ip,port,epoch)
