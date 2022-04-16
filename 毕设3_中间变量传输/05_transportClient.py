@@ -18,6 +18,8 @@ def startClient(device,ip,port,epoch):
     # for channel in range(1,64):
     for channel in range(channel_min,channel_max + 1,step1):
         for wh in range(wh_min,wh_max + 1,step2):
+                if wh == 0 or channel == 0:
+                    continue
 
                 # 创建socket
                 p = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
