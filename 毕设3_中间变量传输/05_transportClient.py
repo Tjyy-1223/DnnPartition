@@ -54,7 +54,7 @@ if __name__ == '__main__':
     epoch = 10
 
     # ip = "127.0.0.1"
-    ip = "122.96.110.181"
+    ip = "112.86.199.140"
     port = 8090
 
     startClient(device,ip,port,epoch)
