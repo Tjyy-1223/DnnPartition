@@ -299,6 +299,27 @@ def read_excel_xls(path,sheet_name):
         print()
 
 
+def get_excel_data(path,sheet_name,col_name):
+    workbook = xlrd.open_workbook(path)  # 打开工作簿
+    worksheet = workbook.sheet_by_name(sheet_name)  # 获取工作簿中的所有表格
+
+    col_index = -1
+    for j in range(0,worksheet.ncols):
+        if worksheet.cell_value(0, j) == col_name:
+            col_index = j
+    if col_index == -1:
+        print("no matched col name")
+        return None
+
+    """
+        开始取相应列的数据
+    """
+    data = []
+    for i in range(1, worksheet.nrows):
+        for j in range(0, worksheet.ncols):
+            if j == col_index:
+                data.append(worksheet.cell_value(i,j))
+    return data
 
 """
     GPU预热操作
