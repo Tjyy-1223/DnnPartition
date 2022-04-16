@@ -33,6 +33,9 @@ def startListening(p,device,epoch,save_flag=False,path = None,sheet_name=None):
     # for channel in range(1,64):
     for channel in range(channel_min, channel_max + 1,step1):
         for wh in range(wh_min, wh_max + 1,step2):
+                if wh == 0 or channel == 0:
+                    continue
+
                 # 等待客户端链接
                 conn, client = p.accept()
                 print(f"successfully connection :{conn}\n")
@@ -91,7 +94,7 @@ if __name__ == '__main__':
     epoch = 10
 
     # ip = "127.0.0.1"
-    ip = "122.96.110.181"
+    ip = "112.86.199.140"
     port = 8090
 
     path = "../res/transport_time.xls"
