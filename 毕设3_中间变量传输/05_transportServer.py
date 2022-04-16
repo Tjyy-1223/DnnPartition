@@ -73,7 +73,7 @@ def startListening(p,device,epoch,save_flag=False,path = None,sheet_name=None):
                     prod *= parse_data.shape[i]
                 # print(prod)
 
-                print(f"shape:{parse_data_shape}   shape's prod:{prod}   dumps'length {dumps_x_length}  transport time:{transport_time:.3f}")
+                print(f"shape:{parse_data_shape}   shape's prod:{prod}   dumps'length {dumps_x_length}  transport time:{transport_time:.3f} ms")
                 if save_flag:
                     # value = [["index", "shape", "shape's prod", "dumps length", "transport time"]]
 
@@ -97,7 +97,7 @@ if __name__ == '__main__':
 
     path = "../res/transport_time"
     sheet_name = "time1"
-    value = [["index", "shape", "shape's prod", "dumps length", "transport time"]]
+    value = [["index", "shape", "shape's prod", "dumps length", "transport time(ms)"]]
 
     save_flag = False
     if save_flag:
