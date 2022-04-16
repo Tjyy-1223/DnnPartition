@@ -20,22 +20,25 @@ def startServer(ip,port):
 
 
 
-def startListening(model,p,device,epoch,save = False,model_name="model",path = None):
+def startListening(p,device,epoch,save_flag=False,path = None,sheet_name=None):
     # X = [1,3,224,224]
-    wh_min = 1
+    wh_min = 0
     wh_max = 224
-    channel_min = 1
+    channel_min = 0
     channel_max = 64
+    step1 = 4
+    step2 = 7
 
+    index = 0
     # for channel in range(1,64):
-    for channel in range(channel_min, channel_max + 1):
-        for w in range(wh_min, wh_max + 1):
-            for h in range(wh_min, wh_max + 1):
+    for channel in range(channel_min, channel_max + 1,step1):
+        for w in range(wh_min, wh_max + 1,step2):
+            for h in range(wh_min, wh_max + 1,step2):
                 # 等待客户端链接
                 conn, client = p.accept()
                 print(f"successfully connection :{conn}\n")
 
-                # 接收客户端发送来的数据长度
+                # 接收客户端发送来的数据长度 即1 - 序列化之后的长度
                 dumps_x_length = pickle.loads(conn.recv(1024))
                 # print(f"client 即将发送的edge_x的数据长度 {dumps_x_length}")
                 resp_length = "getLength".encode("UTF-8")
@@ -54,30 +57,50 @@ def startListening(model,p,device,epoch,save = False,model_name="model",path = N
                     if len(b"".join(data)) >= dumps_x_length:
                         break
                 end_time = time.perf_counter()
+                transport_time = (end_time - start_time) * 1000
+
 
                 # print(f'server data length {len(b"".join(data))}')
                 parse_data = pickle.loads(b"".join(data))
+                parse_data = parse_data.to(device)
 
+                # 2 - parse_data的形状
+                parse_data_shape = parse_data.shape
+
+                # 3 parse_data shape 的 乘积
+                prod = 1
+                for i in range(len(parse_data_shape)):
+                    prod *= parse_data.shape[i]
+                # print(prod)
+
+                print(f"shape:{parse_data_shape}   shape's prod:{prod}   dumps'length {dumps_x_length}  transport time:{transport_time:.3f}")
+                if save_flag:
+                    # value = [["index", "shape", "shape's prod", "dumps length", "transport time"]]
+
+                    value = [[index,f"{parse_data_shape}",prod,dumps_x_length,round(transport_time,3)]]
+                    function.write_excel_xls_append(path, sheet_name, value)
+
+                print("====================================")
+                conn.close()
+                index += 1
+    p.close()
 
 
 
 if __name__ == '__main__':
-    x = torch.rand(1,64,224,224)
-    x_shape = x.shape
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+    epoch = 10
 
-    prod = 1
-    for i in range(len(x_shape)):
-        prod *= x_shape[i]
-    print(prod)
+    ip = "127.0.0.1"
+    # ip = "112.86.198.187"
+    port = 8090
 
-    print(len(pickle.dumps(x)))
+    path = "../res/transport_time"
+    sheet_name = "time1"
+    value = [["index", "shape", "shape's prod", "dumps length", "transport time"]]
 
-    x = torch.rand(1, 24, 24, 24)
-    x_shape = x.shape
-
-    prod = 1
-    for i in range(len(x_shape)):
-        prod *= x_shape[i]
-    print(prod)
-
-    print(len(pickle.dumps(x)))
+    save_flag = False
+    if save_flag:
+        function.create_excel_xsl(path, sheet_name, value)
+    p = startServer(ip, port)
+    startListening(p, device, epoch, save_flag,path=path,sheet_name=sheet_name)

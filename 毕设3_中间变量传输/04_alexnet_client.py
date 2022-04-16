@@ -41,7 +41,12 @@ def startClient(model,x,device,ip,port,epoch):
         """
             step3 发送边缘端计算后的中间数据
         """
+        start_time = time.perf_counter()
         edge_x = pickle.dumps(edge_x)
+        end_time = time.perf_counter()
+        curr = (end_time - start_time)*1000
+        print(f"pickle dumps times {curr}  ms")
+
         edge_x_length = len(edge_x)
         print(f'client data length {edge_x_length}')
 
@@ -88,7 +93,7 @@ if __name__ == '__main__':
         4 epoch 测量GPU/CPU 计算epoch次取平均值
         5 device 目前使用的设备
     """
-    modelIndex = 5
+    modelIndex = 1
     ip = "127.0.0.1"
     # ip = "112.86.199.171"
     port = 8090
