@@ -32,8 +32,7 @@ def startListening(p,device,epoch,save_flag=False,path = None,sheet_name=None):
     index = 0
     # for channel in range(1,64):
     for channel in range(channel_min, channel_max + 1,step1):
-        for w in range(wh_min, wh_max + 1,step2):
-            for h in range(wh_min, wh_max + 1,step2):
+        for wh in range(wh_min, wh_max + 1,step2):
                 # 等待客户端链接
                 conn, client = p.accept()
                 print(f"successfully connection :{conn}\n")
@@ -91,15 +90,15 @@ if __name__ == '__main__':
     device = "cuda" if torch.cuda.is_available() else "cpu"
     epoch = 10
 
-    ip = "127.0.0.1"
-    # ip = "112.86.198.187"
+    # ip = "127.0.0.1"
+    ip = "122.96.110.181"
     port = 8090
 
-    path = "../res/transport_time"
+    path = "../res/transport_time.xls"
     sheet_name = "time1"
     value = [["index", "shape", "shape's prod", "dumps length", "transport time(ms)"]]
 
-    save_flag = False
+    save_flag = True
     if save_flag:
         function.create_excel_xsl(path, sheet_name, value)
     p = startServer(ip, port)
