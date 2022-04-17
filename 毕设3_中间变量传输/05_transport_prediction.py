@@ -8,6 +8,8 @@ from sklearn import metrics
 from sklearn.preprocessing import PolynomialFeatures
 from sklearn.linear_model import Ridge
 import joblib
+import a1_alexNet
+
 
 def getScatterImg(x,y):
     s = 50
@@ -188,6 +190,15 @@ def myPolynomialRidgeRegression(x, y):
     return lin_reg
 
 
+def predictTransportTime(model,x):
+    x_shape = x.shape
+    prod = 1
+    for i in range(len(x_shape)):
+        prod *= x_shape[i]
+    data_x = myTransform(np.array([prod]), degree=3)
+    tranport_time = model.predict(data_x)[0]
+    return tranport_time
+
 if __name__ == '__main__':
     path = "../res/transport_time.xls"
     sheet_name = "time1"
@@ -213,10 +224,29 @@ if __name__ == '__main__':
 
 
     lin_reg = joblib.load("../model/transformTime.m")
+
+    """
     x = [28224,44100,63504,86436,112896,142884,176400,213444,254016,298116,345744,396900,451584]
     x = np.array(x)
     X = myTransform(x,degree=3)
     print(lin_reg.predict(X))
+    """
+
+    # 使用lin_reg计算alexnet每层的传输时延
+    alexnet = a1_alexNet.AlexNet()
+
+    x = torch.rand(size=(1, 3, 224, 224))
+    tranport_time = predictTransportTime(lin_reg,x)
+    print(f"{x.shape}:predict transport time {tranport_time:.3f} ms")
+    print("======================================")
+
+    for layer in alexnet:
+        x = layer(x)
+        tranport_time = predictTransportTime(lin_reg,x)
+        print(f"{layer}\n{x.shape}:predict transport time {tranport_time:.3f} ms")
+        print("======================================")
+
+
 
 
 
