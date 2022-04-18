@@ -1,14 +1,7 @@
 import torch
 import function
-import matplotlib.pyplot as plt
+import functionImg
 import numpy as np
-from sklearn.model_selection import train_test_split
-from sklearn.linear_model import LinearRegression
-from sklearn import metrics
-from sklearn.preprocessing import PolynomialFeatures
-from sklearn.linear_model import Ridge
-import joblib
-import a1_alexNet
 
 
 if __name__ == '__main__':
@@ -18,6 +11,15 @@ if __name__ == '__main__':
     input_size = function.get_excel_data(path,sheet_name,"inputSize")
     output_size = function.get_excel_data(path,sheet_name,"outputSize")
     computation_time = function.get_excel_data(path,sheet_name,"computation time(ms)")
-    print(len(input_size))
-    print(len(output_size))
-    print(len(computation_time))
+
+
+    """
+        绘制一波散点图
+    """
+    x1 = np.array(input_size)
+    x2 = np.array(output_size)
+    x = x1 * x2
+    y = np.array(computation_time)
+    labelx = "input size * output size"
+    labely = "computation time(ms)"
+    functionImg.getScatterImg(x,y,labelx,labely)
