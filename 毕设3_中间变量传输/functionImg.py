@@ -68,7 +68,7 @@ def getLinearImg(x,y,coef,intercept):
     plt.show()
 
 
-def myLinearRegression(x,y):
+def myLinearRegression(x,y,save = False,modelPath = None):
     """
        根据 x 和 y 的趋势拟合一条直线
        coef:  16.789
@@ -86,7 +86,7 @@ def myLinearRegression(x,y):
 
     fig = plt.figure(figsize=(8, 5))
     plt.scatter(x, y, s, c="g", alpha=0.5)
-    plt.plot(np.sort(x), y_pred[np.argsort(x)])
+    plt.plot(np.sort(x), y_pred[np.argsort(x)],c="r")
 
     plt.ticklabel_format(style='sci', axis='x', scilimits=(0, 0), useMathText=True)
     plt.ticklabel_format(style='sci', axis='y', scilimits=(0, 0), useMathText=True)
@@ -100,6 +100,8 @@ def myLinearRegression(x,y):
     plt.xlabel("data's shape")
     plt.ylabel("data's length")
 
+    if save:
+        joblib.dump(linreg,modelPath)
     plt.show()
 
 
@@ -124,7 +126,7 @@ def myPolynomialRegression(x, y,save = False,modelPath = None):
     """
     s = 50
 
-    X2 = myTransform(x, degree=3)
+    X2 = myTransform(x, degree=2)
 
     lin_reg = LinearRegression()
     lin_reg.fit(X2, y)
@@ -223,3 +225,16 @@ def predictTransportTime(model,x):
     data_x = myTransform(np.array([prod]), degree=3)
     tranport_time = model.predict(data_x)[0]
     return tranport_time
+
+
+def predictLinearTime(model,linear):
+    in_features = linear.in_features
+    out_features = linear.out_features
+
+    input_features = in_features * out_features
+    input_features = np.array([input_features]).reshape(-1,1)
+
+    computation_time = model.predict(input_features)[0]
+    return computation_time
+
+

@@ -41,7 +41,7 @@ if __name__ == '__main__':
         function.warmUpCpu(myLinear, x, device)
 
 
-    save_flag = True
+    save_flag = False
     path = "../res/linear_time.xls"
     # sheet_name = "mac"
     sheet_name = "cuda"

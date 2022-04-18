@@ -1,7 +1,12 @@
+import joblib
 import torch
 import function
 import functionImg
 import numpy as np
+import torch.nn as nn
+
+
+
 
 
 if __name__ == '__main__':
@@ -22,4 +27,24 @@ if __name__ == '__main__':
     y = np.array(computation_time)
     labelx = "input size * output size"
     labely = "computation time(ms)"
-    functionImg.getScatterImg(x,y,labelx,labely)
+
+
+    save_flag = False
+    modelPath = "../model/linearTime_cuda.m"
+    # functionImg.getScatterImg(x,y,labelx,labely)
+
+    # functionImg.myLinearRegression(x,y,True,modelPath)
+
+    # functionImg.myPolynomialRegression(x,y)
+
+    lin_reg = joblib.load(modelPath)
+
+    linear1 = nn.Linear(9216,4096)
+    linear2 = nn.Linear(4096,4096)
+    linear3 = nn.Linear(4096,1000)
+    print("real time: 1.02 ms     predict:\t",functionImg.predictLinearTime(lin_reg,linear1)," ms")
+    print("real time: 0.449 ms     predict:\t",functionImg.predictLinearTime(lin_reg,linear2)," ms")
+    print("real time: 0.128 ms     predict:\t",functionImg.predictLinearTime(lin_reg,linear3)," ms")
+
+
+
