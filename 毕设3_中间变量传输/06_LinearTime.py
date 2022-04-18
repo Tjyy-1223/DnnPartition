@@ -41,10 +41,10 @@ if __name__ == '__main__':
         function.warmUpCpu(myLinear, x, device)
 
 
-    save_flag = False
+    save_flag = True
     path = "../res/linear_time.xls"
-    # sheet_name = "mac"
-    sheet_name = "cuda"
+    sheet_name = "mac"
+    # sheet_name = "cuda"
     value = [["index", "layerName", "inputSize", "outputSize", "computation time(ms)"]]
     if save_flag:
         function.create_excel_xsl(path, sheet_name, value)
