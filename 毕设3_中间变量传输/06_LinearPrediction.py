@@ -11,7 +11,7 @@ import torch.nn as nn
 
 if __name__ == '__main__':
     path = "../res/linear_time.xls"
-    sheet_name = "cuda"
+    sheet_name = "mac"
 
     input_size = function.get_excel_data(path,sheet_name,"inputSize")
     output_size = function.get_excel_data(path,sheet_name,"outputSize")
@@ -30,10 +30,10 @@ if __name__ == '__main__':
 
 
     save_flag = False
-    modelPath = "../model/linearTime_cuda.m"
+    modelPath = "../model/linearTime_mac.m"
     # functionImg.getScatterImg(x,y,labelx,labely)
 
-    # functionImg.myLinearRegression(x,y,True,modelPath)
+    # functionImg.myLinearRegression(x,y,labelx,labely,save_flag,modelPath)
 
     # functionImg.myPolynomialRegression(x,y)
 
@@ -42,9 +42,9 @@ if __name__ == '__main__':
     linear1 = nn.Linear(9216,4096)
     linear2 = nn.Linear(4096,4096)
     linear3 = nn.Linear(4096,1000)
-    print("real time: 1.02 ms     predict:\t",functionImg.predictLinearTime(lin_reg,linear1)," ms")
-    print("real time: 0.449 ms     predict:\t",functionImg.predictLinearTime(lin_reg,linear2)," ms")
-    print("real time: 0.128 ms     predict:\t",functionImg.predictLinearTime(lin_reg,linear3)," ms")
+    print("real time: 6.885 ms     predict:\t",functionImg.predictLinearTime(lin_reg,linear1)," ms")
+    print("real time: 3.755 ms     predict:\t",functionImg.predictLinearTime(lin_reg,linear2)," ms")
+    print("real time: 0.997 ms     predict:\t",functionImg.predictLinearTime(lin_reg,linear3)," ms")
 
 
 

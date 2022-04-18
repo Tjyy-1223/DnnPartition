@@ -68,7 +68,7 @@ def getLinearImg(x,y,coef,intercept):
     plt.show()
 
 
-def myLinearRegression(x,y,save = False,modelPath = None):
+def myLinearRegression(x,y,xlabel,ylabel,save = False,modelPath = None):
     """
        根据 x 和 y 的趋势拟合一条直线
        coef:  16.789
@@ -86,6 +86,7 @@ def myLinearRegression(x,y,save = False,modelPath = None):
 
     fig = plt.figure(figsize=(8, 5))
     plt.scatter(x, y, s, c="g", alpha=0.5)
+    plt.scatter(x, y_pred)
     plt.plot(np.sort(x), y_pred[np.argsort(x)],c="r")
 
     plt.ticklabel_format(style='sci', axis='x', scilimits=(0, 0), useMathText=True)
@@ -97,8 +98,8 @@ def myLinearRegression(x,y,save = False,modelPath = None):
     plt.xlim((0, max_X))
     plt.ylim((0, max_Y))
 
-    plt.xlabel("data's shape")
-    plt.ylabel("data's length")
+    plt.xlabel(xlabel)
+    plt.ylabel(ylabel)
 
     if save:
         joblib.dump(linreg,modelPath)
@@ -126,7 +127,7 @@ def myPolynomialRegression(x, y,save = False,modelPath = None):
     """
     s = 50
 
-    X2 = myTransform(x, degree=2)
+    X2 = myTransform(x, degree=3)
 
     lin_reg = LinearRegression()
     lin_reg.fit(X2, y)
