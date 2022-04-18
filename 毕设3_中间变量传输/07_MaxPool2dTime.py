@@ -25,7 +25,7 @@ if __name__ == '__main__':
     if device == "cpu":
         function.warmUpCpu(nn.MaxPool2d(3,2,0), x, device)
 
-    save_flag = True
+    save_flag = False
     path = "../res/maxPool2d_time.xls"
     # sheet_name = "mac"
     sheet_name = "cuda"
