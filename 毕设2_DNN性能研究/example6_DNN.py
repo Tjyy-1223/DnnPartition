@@ -38,7 +38,7 @@ if __name__ == '__main__':
     x = x.to(device)
     print(f"x device : {x.device}")
 
-    modelIndex = 5
+    modelIndex = 2
     model_names = ["alexnet","vgg16","googLeNet","resnet18","mobileNetv2"]
     model_name = model_names[modelIndex-1]
     model = getDnnModel(modelIndex)
@@ -47,7 +47,7 @@ if __name__ == '__main__':
 
     temp_x = x
     epoch = 300
-    save_flag = True
+    save_flag = False
     filter = False
     path = "../res/DnnLayer_mac_power_all.xls"
     if device == "cpu":
