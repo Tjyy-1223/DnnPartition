@@ -239,3 +239,18 @@ def predictLinearTime(model,linear):
     return computation_time
 
 
+def predictMaxPool2dTime(model,maxPool2d,input_data):
+    input_shape = input_data.shape
+    prod = 1
+    for i in range(len(input_shape)):
+        prod *= input_shape[i]
+
+    kernel_size = maxPool2d.kernel_size
+
+    computation_number = prod * kernel_size * kernel_size
+    input_features = np.array([computation_number]).reshape(-1, 1)
+
+    computation_time = model.predict(input_features)[0]
+    return computation_time
+
+

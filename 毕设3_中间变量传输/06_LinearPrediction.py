@@ -29,7 +29,7 @@ if __name__ == '__main__':
     labely = "computation time(ms)"
 
 
-    save_flag = False
+    # save_flag = False
     modelPath = "../model/linearTime_mac.m"
     # functionImg.getScatterImg(x,y,labelx,labely)
 
