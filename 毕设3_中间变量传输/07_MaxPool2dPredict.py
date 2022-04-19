@@ -20,6 +20,7 @@ def compareData_cuda():
     input3 = torch.rand(size=(1, 256, 13, 13))
     maxPool2d3 = nn.MaxPool2d(kernel_size=3, stride=2)
 
+    print("cuda :")
     print("real time: 0.032 ms     predict:\t", round(functionImg.predictMaxPool2dTime(maxPool2d_reg, maxPool2d1, input1),3),
           " ms")
     print("real time: 0.024 ms     predict:\t", round(functionImg.predictMaxPool2dTime(maxPool2d_reg, maxPool2d2, input2),3),
@@ -41,6 +42,7 @@ def compareData_mac():
     input3 = torch.rand(size=(1, 256, 13, 13))
     maxPool2d3 = nn.MaxPool2d(kernel_size=3, stride=2)
 
+    print("mac:")
     print("real time: 0.514 ms     predict:\t", round(functionImg.predictMaxPool2dTime(maxPool2d_reg, maxPool2d1, input1),3),
           " ms")
     print("real time: 0.357 ms     predict:\t", round(functionImg.predictMaxPool2dTime(maxPool2d_reg, maxPool2d2, input2),3),
