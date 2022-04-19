@@ -7,7 +7,7 @@ import torch.nn as nn
 
 
 
-def compareData():
+def compareData_cuda():
     modelPath = "../model/maxPool2dTime_cuda.m"
     maxPool2d_reg = joblib.load(modelPath)
 
@@ -20,16 +20,38 @@ def compareData():
     input3 = torch.rand(size=(1, 256, 13, 13))
     maxPool2d3 = nn.MaxPool2d(kernel_size=3, stride=2)
 
-    print("real time: 0.549 ms     predict:\t", functionImg.predictMaxPool2dTime(maxPool2d_reg, maxPool2d1, input1),
+    print("real time: 0.032 ms     predict:\t", round(functionImg.predictMaxPool2dTime(maxPool2d_reg, maxPool2d1, input1),3),
           " ms")
-    print("real time: 0.386 ms     predict:\t", functionImg.predictMaxPool2dTime(maxPool2d_reg, maxPool2d2, input2),
+    print("real time: 0.024 ms     predict:\t", round(functionImg.predictMaxPool2dTime(maxPool2d_reg, maxPool2d2, input2),3),
           " ms")
-    print("real time: 0.123 ms     predict:\t", functionImg.predictMaxPool2dTime(maxPool2d_reg, maxPool2d3, input3),
+    print("real time: 0.019 ms     predict:\t", round(functionImg.predictMaxPool2dTime(maxPool2d_reg, maxPool2d3, input3),3),
           " ms")
+
+
+def compareData_mac():
+    modelPath = "../model/maxPool2dTime_mac.m"
+    maxPool2d_reg = joblib.load(modelPath)
+
+    input1 = torch.rand(size=(1, 64, 55, 55))
+    maxPool2d1 = nn.MaxPool2d(kernel_size=3, stride=2)
+
+    input2 = torch.rand(size=(1, 192, 27, 27))
+    maxPool2d2 = nn.MaxPool2d(kernel_size=3, stride=2)
+
+    input3 = torch.rand(size=(1, 256, 13, 13))
+    maxPool2d3 = nn.MaxPool2d(kernel_size=3, stride=2)
+
+    print("real time: 0.514 ms     predict:\t", round(functionImg.predictMaxPool2dTime(maxPool2d_reg, maxPool2d1, input1),3),
+          " ms")
+    print("real time: 0.357 ms     predict:\t", round(functionImg.predictMaxPool2dTime(maxPool2d_reg, maxPool2d2, input2),3),
+          " ms")
+    print("real time: 0.107 ms     predict:\t", round(functionImg.predictMaxPool2dTime(maxPool2d_reg, maxPool2d3, input3),3),
+          " ms")
+
 
 if __name__ == '__main__':
     path = "../res/maxPool2d_time.xls"
-    sheet_name = "mac"
+    sheet_name = "mac2"
 
     kernel_size = function.get_excel_data(path,sheet_name,"kernel size")
     stride = function.get_excel_data(path,sheet_name,"stride")
@@ -49,7 +71,7 @@ if __name__ == '__main__':
     labely = "computation time(ms)"
 
     save_flag = False
-    modelPath = "../model/maxPool2dTime_cuda.m"
+    modelPath = "../model/maxPool2dTime_mac.m"
 
     # functionImg.getScatterImg(computation_number, y, "output's shape * kernel_size^2", labely)
     # functionImg.getScatterImg(computation_number/kernel_size, y, "output's shape * kernel_size", labely)
@@ -61,20 +83,28 @@ if __name__ == '__main__':
         cuda  :test MSE: 0.33244975878841315
         cuda 2:test MSE: 0.032208524006268814
         mac   :test MSE: 0.47780505040711524
+        mac 2 :test MSE: 0.06754588686307808
     """
-    functionImg.myLinearRegression(computation_number, y, "output's shape * kernel_size^2", labely, save_flag, modelPath)
+    # functionImg.myLinearRegression(computation_number, y, "output's shape * kernel_size^2", labely, save_flag, modelPath)
 
     """
         cuda  :test MSE: 0.1886064618881174
         cuda 2:test MSE: 0.009826018871006745
         mac   :test MSE: 0.194717963898536
+        mac 2 :test MSE: 0.020775376366165114
     """
-    functionImg.myLinearRegression(computation_number/kernel_size, y, "output's shape * kernel_size", labely, save_flag, modelPath)
+    # functionImg.myLinearRegression(computation_number/kernel_size, y, "output's shape * kernel_size", labely, save_flag, modelPath)
 
     """
         cuda  :test MSE: 0.057864216993720886
         cuda 2:test MSE: 0.020728157308170698
         mac   :test MSE: 1.087570246911298
+        mac 2 :test MSE: 0.0986114609574741
     """
-    functionImg.myLinearRegression(computation_number / kernel_size /kernel_size, y, "output's shape", labely,save_flag, modelPath)
+    # functionImg.myLinearRegression(computation_number / kernel_size /kernel_size, y, "output's shape", labely,save_flag, modelPath)
+
+    compareData_cuda()
+
+
+    compareData_mac()
 

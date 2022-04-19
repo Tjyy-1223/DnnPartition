@@ -100,6 +100,7 @@ def test():
     print(f"input shape:{x.shape}\tkernel size:{kernel_size}\tstride:{stride}\tpadding:{padding}\t"
           f"computation number:{computation_number}\toutput shape:{output_x.shape}\tcomputation time : {computation_time:.3f} ms")
 
+
 def test2():
     device = "cuda" if torch.cuda.is_available() else "cpu"
     epoch = 300
