@@ -28,7 +28,7 @@ if __name__ == '__main__':
     save_flag = False
     path = "../res/maxPool2d_time.xls"
     # sheet_name = "mac"
-    sheet_name = "cuda"
+    sheet_name = "mac"
     value = [["index", "input shape", "kernel size", "stride", "padding","computation number","output shape","computation time"]]
     if save_flag:
         function.create_excel_xsl(path, sheet_name, value)
