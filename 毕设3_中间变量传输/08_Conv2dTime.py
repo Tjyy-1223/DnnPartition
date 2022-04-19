@@ -12,4 +12,3 @@ if __name__ == '__main__':
     x = torch.rand(size=(1,64,112,112))
     x = x.to(device)
 
-    
