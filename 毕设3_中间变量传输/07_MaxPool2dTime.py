@@ -11,10 +11,10 @@ def startWriteData():
     device = "cuda" if torch.cuda.is_available() else "cpu"
     epoch = 300
 
-    save_flag = False
+    save_flag = True
     path = "../res/maxPool2d_time.xls"
     # sheet_name = "mac"
-    sheet_name = "cuda2"
+    sheet_name = "mac2"
     value = [["index", "input shape", "kernel size", "stride", "padding", "computation number", "output shape",
               "computation time"]]
     if save_flag:
@@ -142,7 +142,7 @@ if __name__ == '__main__':
     if device == "cpu":
         function.warmUpCpu(nn.MaxPool2d(3,2,0), x, device)
 
-    # startWriteData()
+    startWriteData()
 
 
     test()
