@@ -25,8 +25,10 @@ def getScatterImg(x,y,xlabel,ylabel):
     plt.ticklabel_format(style='sci', axis='x', scilimits=(0, 0), useMathText=True)
     plt.ticklabel_format(style='sci', axis='y', scilimits=(0, 0), useMathText=True)
     # 设置坐标轴范围
-    max_X = np.max(x)
-    max_Y = np.max(y)
+
+    n = 2
+    max_X = np.max(x) // n
+    max_Y = np.max(y) // n
     plt.xlim((0, max_X))
     plt.ylim((0, max_Y))
 
@@ -57,8 +59,9 @@ def getLinearImg(x,y,coef,intercept):
     plt.ticklabel_format(style='sci', axis='y', scilimits=(0, 0), useMathText=True)
 
     # 设置坐标轴范围
-    max_X = np.max(x)
-    max_Y = np.max(y)
+    n = 1
+    max_X = np.max(x) // n
+    max_Y = np.max(y) // n
     plt.xlim((0, max_X))
     plt.ylim((0, max_Y))
 
@@ -68,7 +71,7 @@ def getLinearImg(x,y,coef,intercept):
     plt.show()
 
 
-def myLinearRegression(x,y,xlabel,ylabel,save = False,modelPath = None):
+def myLinearRegression(x,y,xlabel,ylabel,devide_n=1,save = False,modelPath = None):
     """
        根据 x 和 y 的趋势拟合一条直线
        coef:  16.789
@@ -93,10 +96,12 @@ def myLinearRegression(x,y,xlabel,ylabel,save = False,modelPath = None):
     plt.ticklabel_format(style='sci', axis='y', scilimits=(0, 0), useMathText=True)
 
     # 设置坐标轴范围
-    max_X = np.max(x)
-    max_Y = np.max(y)
+    n = devide_n
+    max_X = np.max(x) // n
+    max_Y = np.max(y) // n
     plt.xlim((0, max_X))
     plt.ylim((0, max_Y))
+
 
     plt.xlabel(xlabel)
     plt.ylabel(ylabel)
@@ -121,13 +126,13 @@ def myTransform(x,degree = 1):
     return X2
 
 
-def myPolynomialRegression(x, y,save = False,modelPath = None):
+def myPolynomialRegression(x, y,labelx,labely,devide_n=1,save = False,modelPath = None):
     """
         根据多项式回归模拟图
     """
     s = 50
 
-    X2 = myTransform(x, degree=3)
+    X2 = myTransform(x, degree=2)
 
     lin_reg = LinearRegression()
     lin_reg.fit(X2, y)
@@ -145,7 +150,7 @@ def myPolynomialRegression(x, y,save = False,modelPath = None):
     斜率参数:  [0.00000000e+00 4.87227671e-04 2.36099771e-10 8.03935911e-17]
     截距参数:  6.9646173709356844
     """
-
+    fig = plt.figure(figsize=(8, 5))
     plt.scatter(x, y, s, c="g", alpha=0.5)
     plt.scatter(x, y_predict)
     plt.plot(np.sort(x), y_predict[np.argsort(x)], color='r')
@@ -154,13 +159,14 @@ def myPolynomialRegression(x, y,save = False,modelPath = None):
     plt.ticklabel_format(style='sci', axis='y', scilimits=(0, 0), useMathText=True)
 
     # 设置坐标轴范围
-    max_X = np.max(x)
-    max_Y = np.max(y)
+    n = devide_n
+    max_X = np.max(x) // n
+    max_Y = np.max(y) // n
     plt.xlim((0, max_X))
     plt.ylim((0, max_Y))
 
-    plt.xlabel("data's shape")
-    plt.ylabel("transport latency(ms)")
+    plt.xlabel(labelx)
+    plt.ylabel(labely)
 
     plt.show()
 
@@ -170,12 +176,14 @@ def myPolynomialRegression(x, y,save = False,modelPath = None):
     return lin_reg
 
 
-def myPolynomialRidgeRegression(x, y):
+def myPolynomialRidgeRegression(x,y,labelx,labely,save = False,modelPath = None):
     """
         Ridge 多项式回归
     """
     s = 50
     X2 = myTransform(x, degree=3)
+    # X2 = x
+    # print(X2)
 
     lin_reg = Ridge()
     lin_reg.fit(X2, y)
@@ -196,21 +204,24 @@ def myPolynomialRidgeRegression(x, y):
 
     plt.scatter(x, y, s, c="g", alpha=0.5)
     plt.scatter(x, y_predict)
+    # plt.scatter(y,y_predict)
     plt.plot(np.sort(x), y_predict[np.argsort(x)], color='r')
 
     plt.ticklabel_format(style='sci', axis='x', scilimits=(0, 0), useMathText=True)
     plt.ticklabel_format(style='sci', axis='y', scilimits=(0, 0), useMathText=True)
 
     # 设置坐标轴范围
-    max_X = np.max(x)
-    max_Y = np.max(y)
+    # max_X = np.max(y)
+    max_X = 3
     plt.xlim((0, max_X))
-    plt.ylim((0, max_Y))
+    plt.ylim((0, max_X))
 
-    plt.xlabel("data's shape")
-    plt.ylabel("transport latency(ms)")
+    plt.xlabel("y")
+    plt.ylabel("y_predict")
 
     plt.show()
+    if save:
+        joblib.dump(lin_reg,modelPath)
     return lin_reg
 
 

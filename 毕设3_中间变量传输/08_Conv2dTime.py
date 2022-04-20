@@ -11,11 +11,11 @@ def startWriteData():
     device = "cuda" if torch.cuda.is_available() else "cpu"
     epoch = 300
 
-    save_flag = False
-    path = "../res/Conv2d_time.xls"
+    save_flag = True
+    path = "../res/conv2d_time.xls"
     # sheet_name = "mac"
-    sheet_name = "cuda"
-    value = [["index", "input shape", "kernel size", "stride", "padding", "computation number", "output shape",
+    sheet_name = "kernel"
+    value = [["index", "in_channel","in_map", "kernel size", "stride", "padding", "computation number","out_channel","out_map",
               "computation time"]]
     if save_flag:
         function.create_excel_xsl(path, sheet_name, value)
@@ -40,11 +40,11 @@ def startWriteData():
                     padding_max = min(2, kernel_size // 2) + 1
                     stride_max = min(4, kernel_size) + 1
 
-                    for stride in range(1, stride_max):
-                        # for stride in range(1, stride_max):
+                    # for stride in range(1, stride_max):
+                    for stride in range(1, 2):
 
                         # for padding in range(0, padding_max):
-                        for padding in range(0, padding_max):
+                        for padding in range(1, 2):
                             myConv2d = nn.Conv2d(in_channels=in_channel,out_channels=out_channel,kernel_size=kernel_size, stride=stride, padding=padding)
                             myConv2d = myConv2d.to(device)
 
@@ -65,8 +65,8 @@ def startWriteData():
                                 f"computation number:{computation_number}\toutput shape:{output_x.shape}\tcomputation time : {computation_time:.3f} ms")
 
                             if save_flag:
-                                value = [[index, f"{x.shape}", kernel_size, stride, padding, computation_number,
-                                          f"{output_x.shape}", round(computation_time, 3)]]
+                                value = [[index,x.shape[1],x.shape[2], kernel_size, stride, padding, computation_number,
+                                          output_x.shape[1],output_x.shape[2], round(computation_time, 3)]]
                                 function.write_excel_xls_append(path, sheet_name, value)
 
                             index += 1
