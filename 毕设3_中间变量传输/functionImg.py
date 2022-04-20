@@ -97,8 +97,9 @@ def myLinearRegression(x,y,xlabel,ylabel,devide_n=1,save = False,modelPath = Non
 
     # 设置坐标轴范围
     n = devide_n
+    y_n = devide_n
     max_X = np.max(x) // n
-    max_Y = np.max(y) // n
+    max_Y = np.max(y) // y_n
     plt.xlim((0, max_X))
     plt.ylim((0, max_Y))
 
@@ -132,8 +133,8 @@ def myPolynomialRegression(x, y,labelx,labely,devide_n=1,save = False,modelPath 
     """
     s = 50
 
-    X2 = myTransform(x, degree=2)
-
+    # X2 = myTransform(x, degree=3)
+    X2 = x
     lin_reg = LinearRegression()
     lin_reg.fit(X2, y)
 
@@ -160,8 +161,9 @@ def myPolynomialRegression(x, y,labelx,labely,devide_n=1,save = False,modelPath 
 
     # 设置坐标轴范围
     n = devide_n
+    y_n = devide_n
     max_X = np.max(x) // n
-    max_Y = np.max(y) // n
+    max_Y = np.max(y) // y_n
     plt.xlim((0, max_X))
     plt.ylim((0, max_Y))
 
@@ -265,3 +267,18 @@ def predictMaxPool2dTime(model,maxPool2d,input_data):
     return computation_time
 
 
+def predictConv2dTime(model,conv2d,input_data):
+    input_shape = input_data.shape
+
+    input_map = input_shape[3]
+    kernel_size = conv2d.kernel_size[0]
+    padding = conv2d.padding[0]
+    stride = conv2d.stride[0]
+
+    output_map = (input_map - kernel_size + padding + stride) / stride
+
+    computation_number = output_map * output_map * conv2d.in_channels * conv2d.out_channels * kernel_size * kernel_size
+    input_features = np.array([computation_number]).reshape(-1, 1)
+
+    computation_time = model.predict(input_features)[0]
+    return computation_time

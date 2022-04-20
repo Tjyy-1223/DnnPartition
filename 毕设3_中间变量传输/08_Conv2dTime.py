@@ -14,7 +14,7 @@ def startWriteData():
     save_flag = True
     path = "../res/conv2d_time.xls"
     # sheet_name = "mac"
-    sheet_name = "kernel"
+    sheet_name = "test"
     value = [["index", "in_channel","in_map", "kernel size", "stride", "padding", "computation number","out_channel","out_map",
               "computation time"]]
     if save_flag:
@@ -22,9 +22,10 @@ def startWriteData():
 
     # x_WH = 224
     index = 0
-    for x_WH in [6, 7, 13, 14, 27, 28, 55, 56, 112, 224]:
-        for in_channel in range(0, 512, 64):
-            for out_channel in range(0,512,64):
+    # for x_WH in [7, 13, 14, 27, 28, 55, 56, 112, 224]:
+    for x_WH in [7,14,28,56,112,224]:
+        for in_channel in range(0, 33, 32):
+            for out_channel in range(0,33,32):
                 if x_WH >= 55 and (in_channel > 256 or out_channel > 256):
                     continue
 
