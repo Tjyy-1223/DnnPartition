@@ -22,10 +22,10 @@ def startWriteData():
 
     # x_WH = 224
     index = 0
-    # for x_WH in [7, 13, 14, 27, 28, 55, 56, 112, 224]:
-    for x_WH in [7,14,28,56,112,224]:
-        for in_channel in range(0, 33, 32):
-            for out_channel in range(0,33,32):
+    for x_WH in [7, 13, 14, 27, 28, 55, 56, 112, 224]:
+    # for x_WH in [7,14,28,56,112,224]:
+        for in_channel in range(0, 512, 64):
+            for out_channel in range(0,512,64):
                 if x_WH >= 55 and (in_channel > 256 or out_channel > 256):
                     continue
 
