@@ -8,8 +8,8 @@ import torch.nn as nn
 
 
 def save_model(x,y):
-    save_flag = False
-    modelPath = "../model/conv2d_cuda.m"
+    save_flag = True
+    modelPath = "../model/conv2d_mac.m"
     labely = "computation time(ms)"
 
     devide_n = 3
@@ -38,6 +38,7 @@ def compareData_cuda():
     input3 = torch.rand(size=(1, 256, 28, 28))
     myConv2d3 = nn.Conv2d(in_channels=256,out_channels=512,kernel_size=3,stride=1,padding=1)
 
+
     print("cuda :")
     print("real time: 0.328 ms     predict:\t",round(functionImg.predictConv2dTime(conv2d_reg, myConv2d1, input1), 3)," ms")
     print("real time: 0.707 ms     predict:\t",round(functionImg.predictConv2dTime(conv2d_reg, myConv2d2, input2), 3)," ms")
@@ -45,11 +46,42 @@ def compareData_cuda():
 
 
 
+def compareData_mac():
+    modelPath = "../model/conv2d_mac.m"
+    conv2d_reg = joblib.load(modelPath)
+
+    input1 = torch.rand(size=(1, 3, 224, 224))
+    myConv2d1 = nn.Conv2d(in_channels=3,out_channels=64,kernel_size=3,stride=1,padding=1)
+
+    input2 = torch.rand(size=(1, 64, 224, 224))
+    myConv2d2 = nn.Conv2d(in_channels=64,out_channels=64,kernel_size=3,stride=1,padding=1)
+
+    input3 = torch.rand(size=(1,64,112,112))
+    myConv2d3 = nn.Conv2d(in_channels=64,out_channels=128,kernel_size=3,stride=1,padding=1)
+
+    input4 = torch.rand(size=(1, 128, 112, 112))
+    myConv2d4 = nn.Conv2d(in_channels=128, out_channels=128, kernel_size=3, stride=1, padding=1)
+
+    input5 = torch.rand(size=(1, 256,28,28))
+    myConv2d5 = nn.Conv2d(in_channels=256, out_channels=512, kernel_size=3, stride=1, padding=1)
+
+    print("cuda :")
+    print("real time: 2.088 ms     predict:\t",round(functionImg.predictConv2dTime(conv2d_reg, myConv2d1, input1), 3)," ms")
+    print("real time: 23.281 ms     predict:\t",round(functionImg.predictConv2dTime(conv2d_reg, myConv2d2, input2), 3)," ms")
+    print("real time: 11.392 ms     predict:\t",round(functionImg.predictConv2dTime(conv2d_reg, myConv2d3, input3), 3)," ms")
+    print("real time: 20.531 ms     predict:\t", round(functionImg.predictConv2dTime(conv2d_reg, myConv2d4, input4), 3)," ms")
+    print("real time: 10.118 ms     predict:\t", round(functionImg.predictConv2dTime(conv2d_reg, myConv2d5, input5), 3)," ms")
+
+
+
+
+
+
 
 if __name__ == '__main__':
     path = "../res/Conv2d_time.xls"
-    sheet_name = "kernel"
-    # sheet_name = "test"
+    sheet_name = "mac"
+    # sheet_name = "kernel"
 
     in_channel = function.get_excel_data(path,sheet_name,"in_channel")
     in_map = function.get_excel_data(path,sheet_name,"in_map")
@@ -85,7 +117,7 @@ if __name__ == '__main__':
 
     compareData_cuda()
 
-
+    # compareData_mac()
 
 
 
