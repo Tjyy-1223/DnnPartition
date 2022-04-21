@@ -13,8 +13,8 @@ def startWriteData():
 
     save_flag = True
     path = "../res/conv2d_time.xls"
-    # sheet_name = "mac"
-    sheet_name = "test"
+    sheet_name = "mac"
+    # sheet_name = "test"
     value = [["index", "in_channel","in_map", "kernel size", "stride", "padding", "computation number","out_channel","out_map",
               "computation time"]]
     if save_flag:
@@ -119,6 +119,6 @@ if __name__ == '__main__':
         function.warmUpCpu(warmModel, x, device)
 
     startWriteData()
-    test()
+    # test()
 
 
