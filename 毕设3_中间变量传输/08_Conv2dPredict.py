@@ -9,7 +9,7 @@ import torch.nn as nn
 
 def save_model(x,y):
     save_flag = True
-    modelPath = "../model/conv2d_mac.m"
+    modelPath = "../model/conv2d_cuda2.m"
     labely = "computation time(ms)"
 
     devide_n = 3
@@ -115,9 +115,9 @@ if __name__ == '__main__':
 
     # save_model(number,y)
 
-    # compareData_cuda()
+    compareData_cuda()
 
-    compareData_mac()
+    # compareData_mac()
 
 
 
