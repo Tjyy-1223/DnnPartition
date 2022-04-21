@@ -115,9 +115,9 @@ if __name__ == '__main__':
 
     # save_model(number,y)
 
-    compareData_cuda()
+    # compareData_cuda()
 
-    # compareData_mac()
+    compareData_mac()
 
 
 

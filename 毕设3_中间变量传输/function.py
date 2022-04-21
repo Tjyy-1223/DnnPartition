@@ -51,7 +51,7 @@ def model_partition(alexnet, index):
     最后返回运行结果x
     修改：省略了 激活层 batchnormal层 以及 dropout层
 """
-def show_features_gpu(alexnet, x ,filter = True,epoch = 3,save = False,model_name = "model",path = None):
+def show_features_gpu(alexnet, x ,filter = True,epoch = 300,save = False,model_name = "model",path = None):
 
     device = "cuda" if torch.cuda.is_available() else "cpu"
 
