@@ -380,6 +380,7 @@ def warmUpCpu(model,x,device):
     记录GPU的用时
 """
 def recordTimeGpu(model, x, device, epoch):
+    model = model.to(device)
     all_time = 0.0
     for i in range(epoch):
         x = torch.rand(x.shape).to(device)
@@ -405,6 +406,7 @@ def recordTimeGpu(model, x, device, epoch):
 """
 
 def recordTimeCpu(model, x, device, epoch):
+    model = model.to(device)
     all_time = 0.0
     for i in range(epoch):
         x = torch.rand(x.shape).to(device)
@@ -443,3 +445,22 @@ def getDnnModel(index):
     else:
         print("no model")
         return None
+
+
+def addList(mylist):
+    for i in range(len(mylist)):
+        if i == 0:
+            continue
+        else:
+            mylist[i] = mylist[i-1] + mylist[i]
+    return mylist
+
+
+def addListReverse(mylist):
+    length = len(mylist)
+    for i in range(length-1,-1,-1):
+        if i == length - 1:
+            continue
+        else:
+            mylist[i] = mylist[i+1] + mylist[i]
+    return mylist
