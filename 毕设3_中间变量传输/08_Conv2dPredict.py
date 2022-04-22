@@ -8,8 +8,8 @@ import torch.nn as nn
 
 
 def save_model(x,y):
-    save_flag = True
-    modelPath = "../model/conv2d_cuda2.m"
+    save_flag = False
+    modelPath = "../model/conv2d_test.m"
     labely = "computation time(ms)"
 
     devide_n = 3
@@ -80,7 +80,7 @@ def compareData_mac():
 
 if __name__ == '__main__':
     path = "../res/Conv2d_time.xls"
-    sheet_name = "mac"
+    sheet_name = "test"
     # sheet_name = "kernel"
 
     in_channel = function.get_excel_data(path,sheet_name,"in_channel")
@@ -113,7 +113,7 @@ if __name__ == '__main__':
     var2 = out_channel * out_map * out_map
     x = np.c_[one, var1, var2]
 
-    # save_model(number,y)
+    save_model(number,y)
 
     compareData_cuda()
 
