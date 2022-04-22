@@ -55,7 +55,7 @@ def requestEdgeTime(model_selection,device = "cpu"):
             x, time = function.recordTimeGpu(layer, x, device, 300)
         if device == "cpu":
             x, time = function.recordTimeCpu(layer, x, device, 30)
-        # print(f"{layer} \t\t computation time :{time:.3f}")
+        print(f"{layer} \t\t computation time :{time:.3f}")
         EdgeTime.append(time)
     return EdgeTime
 
@@ -139,7 +139,7 @@ def getBestPartitionPoint(model_selection,cloud_time,edge_time,transport_time):
 
 if __name__ == '__main__':
     device = "cuda" if torch.cuda.is_available() else "cpu"
-    model_selection = 2
+    model_selection = 5
     ip = "127.0.0.1"
     # ip = "112.86.199.171"
     port = 8090
@@ -147,6 +147,6 @@ if __name__ == '__main__':
     cloud_time = requestCloudTime(ip, port, model_selection)
     edge_time = requestEdgeTime(model_selection)
     transport_time = requestTransportTime(model_selection)
-
+    print("======================================================================================================================")
     getBestPartitionPoint(model_selection,cloud_time, edge_time, transport_time)
 
