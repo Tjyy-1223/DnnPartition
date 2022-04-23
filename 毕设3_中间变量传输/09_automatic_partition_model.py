@@ -28,8 +28,8 @@ def addListReverse(mylist):
 if __name__ == '__main__':
     device = "cuda" if torch.cuda.is_available() else "cpu"
     path = "../res/cpu_gpu.xls"
-    sheet_name = "alexnet"
-    # sheet_name = "vgg16"
+    # sheet_name = "alexnet"
+    sheet_name = "vgg16"
     """
         查看xls数据
     """
@@ -54,8 +54,8 @@ if __name__ == '__main__':
     input_data = torch.rand(size=(1,3,224,224))
     input_data = input_data.to(device)
 
-    alexnet = a1_alexNet.AlexNet()
-    # alexnet = a2_vggNet.vgg16()
+    # alexnet = a1_alexNet.AlexNet()
+    alexnet = a2_vggNet.vgg16()
     alexnet = alexnet.to(device)
 
     # function.show_features_gpu(alexnet,input_data)

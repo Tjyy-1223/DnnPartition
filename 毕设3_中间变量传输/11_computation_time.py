@@ -1,6 +1,8 @@
 import function
+import model_features
 import a1_alexNet
 import torch
+
 
 def show_FLOPs_features_gpu(model,x,device="cuda",epoch=300):
     model_len = len(model)

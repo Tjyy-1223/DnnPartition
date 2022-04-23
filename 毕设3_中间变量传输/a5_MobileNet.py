@@ -9,7 +9,7 @@ from torchvision import models
 
 # models.mobilenet_v2()
 
-
+# Convolution-Normalzation-Activation blocks
 class ConvNormActivation(torch.nn.Sequential):
     """
     Configurable block used for Convolution-Normalzation-Activation blocks.
