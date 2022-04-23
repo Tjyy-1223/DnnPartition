@@ -9,10 +9,10 @@ import torch.nn as nn
 
 def save_model(x,y):
     save_flag = False
-    modelPath = "../model/conv2d_test.m"
+    modelPath = "../model/conv2d_mac2.m"
     labely = "computation time(ms)"
 
-    devide_n = 4
+    devide_n = 1
     """
      cuda :
         linear test MSE: 12.583123707667841
@@ -22,7 +22,7 @@ def save_model(x,y):
         test MSE: 288.21331425726095 
     """
     functionImg.getScatterImg(x, y, "in_channel * out_channel * kernel_size^2 * out_map^2", labely)
-    # functionImg.myLinearRegression(x, y, "in_channel * out_channel * kernel_size^2 * out_map^2", labely,devide_n,save_flag,modelPath)
+    functionImg.myLinearRegression(x, y, "in_channel * out_channel * kernel_size^2 * out_map^2", labely,devide_n,save_flag,modelPath)
     # functionImg.myPolynomialRegression(x, y, "in_channel * out_channel * kernel_size^2 * out_map^2", labely,devide_n,save_flag,modelPath)
 
 
@@ -48,7 +48,7 @@ def compareData_cuda():
 
 
 def compareData_mac():
-    modelPath = "../model/conv2d_mac.m"
+    modelPath = "../model/conv2d_mac2.m"
     conv2d_reg = joblib.load(modelPath)
 
     input1 = torch.rand(size=(1, 3, 224, 224))
@@ -81,8 +81,8 @@ def compareData_mac():
 
 if __name__ == '__main__':
     path = "../res/Conv2d_time.xls"
-    # sheet_name = "test"
-    sheet_name = "kernel"
+    sheet_name = "mac"
+    # sheet_name = "kernel"
 
     in_channel = function.get_excel_data(path,sheet_name,"in_channel")
     in_map = function.get_excel_data(path,sheet_name,"in_map")

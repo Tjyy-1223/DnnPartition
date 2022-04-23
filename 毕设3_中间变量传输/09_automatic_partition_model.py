@@ -70,7 +70,8 @@ if __name__ == '__main__':
     maxPool2dModel_cuda = joblib.load("../model/maxPool2dTime_cuda.m")
     maxPool2dModel_mac = joblib.load("../model/maxPool2dTime_mac.m")
     conv2dModel_cuda = joblib.load("../model/conv2d_cuda.m")
-    conv2dModel_mac = joblib.load("../model/conv2d_mac.m")
+    # conv2dModel_mac = joblib.load("../model/conv2d_mac.m")
+    conv2dModel_mac = joblib.load("../model/conv2d_mac2.m")
 
 
     # layerName = ["None"]

@@ -11,7 +11,7 @@ def startWriteData():
     device = "cuda" if torch.cuda.is_available() else "cpu"
     epoch = 300
 
-    save_flag = True
+    save_flag = False
     path = "../res/conv2d_time.xls"
     sheet_name = "mac2"
     # sheet_name = "test"
