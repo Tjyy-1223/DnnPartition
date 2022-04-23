@@ -27,8 +27,8 @@ def getScatterImg(x,y,xlabel,ylabel):
     # 设置坐标轴范围
 
     n = 1
-    max_X = np.max(x) // n
-    max_Y = np.max(y) // n
+    max_X = np.max(x)
+    max_Y = np.max(y)
     plt.xlim((0, max_X))
     plt.ylim((0, max_Y))
 
@@ -60,8 +60,9 @@ def getLinearImg(x,y,coef,intercept):
 
     # 设置坐标轴范围
     n = 1
-    max_X = np.max(x) // n
-    max_Y = np.max(y) // n
+    max_X = np.max(x)
+    max_Y = np.max(y)
+    print(max_Y)
     plt.xlim((0, max_X))
     plt.ylim((0, max_Y))
 
