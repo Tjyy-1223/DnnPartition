@@ -12,7 +12,7 @@ def save_model(x,y):
     modelPath = "../model/conv2d_test.m"
     labely = "computation time(ms)"
 
-    devide_n = 3
+    devide_n = 4
     """
      cuda :
         linear test MSE: 12.583123707667841
@@ -21,7 +21,8 @@ def save_model(x,y):
         paper polynomial : x1 - input channel       x2 - map * map * output channel 
         test MSE: 288.21331425726095 
     """
-    functionImg.myLinearRegression(x, y, "in_channel * out_channel * kernel_size^2 * out_map^2", labely,devide_n,save_flag,modelPath)
+    functionImg.getScatterImg(x, y, "in_channel * out_channel * kernel_size^2 * out_map^2", labely)
+    # functionImg.myLinearRegression(x, y, "in_channel * out_channel * kernel_size^2 * out_map^2", labely,devide_n,save_flag,modelPath)
     # functionImg.myPolynomialRegression(x, y, "in_channel * out_channel * kernel_size^2 * out_map^2", labely,devide_n,save_flag,modelPath)
 
 
@@ -80,8 +81,8 @@ def compareData_mac():
 
 if __name__ == '__main__':
     path = "../res/Conv2d_time.xls"
-    sheet_name = "test"
-    # sheet_name = "kernel"
+    # sheet_name = "test"
+    sheet_name = "kernel"
 
     in_channel = function.get_excel_data(path,sheet_name,"in_channel")
     in_map = function.get_excel_data(path,sheet_name,"in_map")
@@ -115,7 +116,7 @@ if __name__ == '__main__':
 
     save_model(number,y)
 
-    compareData_cuda()
+    # compareData_cuda()
 
     # compareData_mac()
 

@@ -8,7 +8,8 @@ import a1_alexNet
 
 
 def alexNetPrediction():
-    lin_reg = joblib.load("../model/transformTime.m")
+    # lin_reg = joblib.load("../model/transformTime.m")
+    lin_reg = joblib.load("../model/tranportTime_fast.m")
 
     """
     x = [28224,44100,63504,86436,112896,142884,176400,213444,254016,298116,345744,396900,451584]
@@ -41,7 +42,7 @@ def alexNetPrediction():
 
 if __name__ == '__main__':
     path = "../res/transport_time.xls"
-    sheet_name = "time1"
+    sheet_name = "time2"
 
     # function.read_excel_xls(path,sheet_name)
 
@@ -49,14 +50,16 @@ if __name__ == '__main__':
     data_length = function.get_excel_data(path,sheet_name,"dumps length")
     transport_time = function.get_excel_data(path,sheet_name,"transport time(ms)")
 
-    x = np.array(shape_prod)
+    x = np.array(data_length)
     y = np.array(transport_time)
 
     # 线性回归
-    # myLinearRegression(x,y)
+    # functionImg.getScatterImg(x,y,"data's length","transport time(ms)")
+    # functionImg.myLinearRegression(x,y,"data's length","transport time(ms)")
 
+    # modelPath = "../model/tranportTime_fast.m"
     # 多项式回归 no Ridge
-    # lin_reg = myPolynomialRegression(x,y)
+    # lin_reg = functionImg.myPolynomialRegression(x,y,"data's length","transport time(ms)",save=True,modelPath=modelPath)
     # print(lin_reg.coef_)
 
     # 多项式回归 Ridge

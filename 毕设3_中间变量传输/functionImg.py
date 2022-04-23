@@ -26,9 +26,9 @@ def getScatterImg(x,y,xlabel,ylabel):
     plt.ticklabel_format(style='sci', axis='y', scilimits=(0, 0), useMathText=True)
     # 设置坐标轴范围
 
-    n = 2
+    n = 88
     max_X = np.max(x) // n
-    max_Y = np.max(y) // n
+    max_Y = np.max(y) // (n //2)
     plt.xlim((0, max_X))
     plt.ylim((0, max_Y))
 
@@ -133,8 +133,8 @@ def myPolynomialRegression(x, y,labelx,labely,devide_n=1,save = False,modelPath 
     """
     s = 50
 
-    # X2 = myTransform(x, degree=3)
-    X2 = x
+    X2 = myTransform(x, degree=2)
+    # X2 = x
     lin_reg = LinearRegression()
     lin_reg.fit(X2, y)
 
@@ -236,7 +236,8 @@ def predictTransportTime(model,x):
     prod = 1
     for i in range(len(x_shape)):
         prod *= x_shape[i]
-    data_x = myTransform(np.array([prod]), degree=3)
+    # data_x = myTransform(np.array([prod]), degree=3)
+    data_x = myTransform(np.array([prod]), degree=2)
     tranport_time = model.predict(data_x)[0]
     return tranport_time
 

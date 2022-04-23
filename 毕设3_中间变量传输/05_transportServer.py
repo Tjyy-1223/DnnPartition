@@ -93,12 +93,12 @@ if __name__ == '__main__':
     device = "cuda" if torch.cuda.is_available() else "cpu"
     epoch = 10
 
-    # ip = "127.0.0.1"
-    ip = "112.86.199.140"
+    ip = "127.0.0.1"
+    # ip = "112.86.199.140"
     port = 8090
 
     path = "../res/transport_time.xls"
-    sheet_name = "time1"
+    sheet_name = "time2"
     value = [["index", "shape", "shape's prod", "dumps length", "transport time(ms)"]]
 
     save_flag = True
