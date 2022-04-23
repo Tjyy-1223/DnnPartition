@@ -99,8 +99,8 @@ def myLinearRegression(x,y,xlabel,ylabel,devide_n=1,save = False,modelPath = Non
     # 设置坐标轴范围
     n = devide_n
     y_n = devide_n
-    max_X = np.max(x) // n
-    max_Y = np.max(y) // y_n
+    max_X = np.max(x)
+    max_Y = np.max(y)
     plt.xlim((0, max_X))
     plt.ylim((0, max_Y))
 
@@ -128,14 +128,49 @@ def myTransform(x,degree = 1):
     return X2
 
 
+def myPolynomialRegression_single(x, y,labelx,labely,degree = 1,devide_n=1,save = False,modelPath = None):
+    """
+        根据多项式回归模拟图
+    """
+    s = 50
+
+    X2 = myTransform(x, degree=degree)
+    # X2 = x
+    lin_reg = LinearRegression()
+    lin_reg.fit(X2, y)
+
+    y_predict = lin_reg.predict(X2)
+    print("test MSE:", metrics.mean_squared_error(y_predict, y))
+
+    fig = plt.figure(figsize=(8, 5))
+    plt.scatter(x, y, s, c="g", alpha=0.5)
+    plt.scatter(x, y_predict)
+    plt.plot(np.sort(x), y_predict[np.argsort(x)], color='r')
+
+
+    plt.ticklabel_format(style='sci', axis='x', scilimits=(0, 0), useMathText=True)
+    plt.ticklabel_format(style='sci', axis='y', scilimits=(0, 0), useMathText=True)
+
+    plt.xlabel(labelx)
+    plt.ylabel(labely)
+
+    plt.show()
+
+    if save:
+        joblib.dump(lin_reg,modelPath)
+
+    return lin_reg
+
+
+
 def myPolynomialRegression(x, y,labelx,labely,devide_n=1,save = False,modelPath = None):
     """
         根据多项式回归模拟图
     """
     s = 50
 
-    X2 = myTransform(x, degree=2)
-    # X2 = x
+    # X2 = myTransform(x, degree=2)
+    X2 = x
     lin_reg = LinearRegression()
     lin_reg.fit(X2, y)
 
@@ -153,20 +188,22 @@ def myPolynomialRegression(x, y,labelx,labely,devide_n=1,save = False,modelPath 
     截距参数:  6.9646173709356844
     """
     fig = plt.figure(figsize=(8, 5))
-    plt.scatter(x, y, s, c="g", alpha=0.5)
-    plt.scatter(x, y_predict)
-    plt.plot(np.sort(x), y_predict[np.argsort(x)], color='r')
+    # plt.scatter(x, y, s, c="g", alpha=0.5)
+    # plt.scatter(x, y_predict)
+    plt.scatter(y, y_predict)
+    # plt.plot(np.sort(x), y_predict[np.argsort(x)], color='r')
+
 
     plt.ticklabel_format(style='sci', axis='x', scilimits=(0, 0), useMathText=True)
     plt.ticklabel_format(style='sci', axis='y', scilimits=(0, 0), useMathText=True)
 
     # 设置坐标轴范围
-    n = devide_n
-    y_n = devide_n
-    max_X = np.max(x) // n
-    max_Y = np.max(y) // y_n
-    plt.xlim((0, max_X))
-    plt.ylim((0, max_Y))
+    # n = devide_n
+    # y_n = devide_n
+    # max_X = np.max(x)
+    # max_Y = np.max(y)
+    # plt.xlim((0, max_X))
+    # plt.ylim((0, max_Y))
 
     plt.xlabel(labelx)
     plt.ylabel(labely)
