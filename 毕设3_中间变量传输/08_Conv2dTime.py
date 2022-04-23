@@ -13,7 +13,7 @@ def startWriteData():
 
     save_flag = True
     path = "../res/conv2d_time.xls"
-    sheet_name = "small"
+    sheet_name = "mac2"
     # sheet_name = "test"
     value = [["index", "in_channel","in_map", "kernel size", "stride", "padding", "computation number","out_channel","out_map",
               "computation time"]]
@@ -22,11 +22,13 @@ def startWriteData():
 
     # x_WH = 224
     index = 0
-    for x_WH in [7, 13, 27, 55, 112]:
+    for x_WH in [7, 13, 27, 55, 112,224]:
     # for x_WH in [7,14,28,56,112,224]:
-        for in_channel in range(0, 257, 64):
-            for out_channel in range(0,257,64):
-                if x_WH >= 55 and (in_channel > 128 or out_channel > 128):
+        for in_channel in range(0, 513, 64):
+            for out_channel in range(0,513,64):
+                if x_WH >= 55 and (in_channel > 256 or out_channel > 256):
+                    continue
+                if x_WH >= 112 and (in_channel > 64 or out_channel > 64):
                     continue
 
                 if in_channel == 0 or out_channel == 0:
@@ -118,7 +120,7 @@ if __name__ == '__main__':
     if device == "cpu":
         function.warmUpCpu(warmModel, x, device)
 
-    # startWriteData()
+    startWriteData()
     # test()
 
 
