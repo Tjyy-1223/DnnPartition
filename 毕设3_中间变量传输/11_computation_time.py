@@ -32,7 +32,7 @@ def show_FLOPs_features(model,x,epoch=300,save_flag=False,Path=None,sheetname=No
 
         if device == "cuda":
             now_x, myTime = function.recordTimeGpu(layer, now_x, device, epoch)
-        if device == "cpu":
+        elif device == "cpu":
             now_x, myTime = function.recordTimeCpu(layer, now_x, device, epoch)
         else:
             myTime = 0.0
@@ -64,7 +64,7 @@ def show_FLOPs_features(model,x,epoch=300,save_flag=False,Path=None,sheetname=No
 def get_predict_data(save_flag = False):
     save_flag = save_flag
     path = "../res/computation_time.xls"
-    sheet_name = "mac_one1"
+    sheet_name = "mac_one"
     value = [["flops", "params","flops2","params2","times",]]
     if save_flag:
         function.create_excel_xsl(path, sheet_name, value)
@@ -102,7 +102,7 @@ def get_predict_data(save_flag = False):
 def get_predict_model():
     mm = MinMaxScaler()
     path = "../res/computation_time.xls"
-    sheet_name = "cuda_one"
+    sheet_name = "mac_one"
 
     flops = function.get_excel_data(path,sheet_name,"flops")
     flops2 = function.get_excel_data(path,sheet_name,"flops2")
@@ -121,27 +121,28 @@ def get_predict_model():
     # functionImg.getScatterImg(params,times,"params","times(ms)")
     # functionImg.getScatterImg(params2,times,"params2","times(ms)")
 
-    save = False
+    save = True
     # functionImg.myPolynomialRegression_single(flops2,times,"flops","times(ms)",degree=2,save=save,
     #                                           modelPath="../model/flops_time_cuda.m")
     # functionImg.myPolynomialRegression_single(flops2,times,"flops","times(ms)",degree=3)
 
     functionImg.myPolynomialRegression_single(flops2, times, "flops", "times(ms)", degree=2, save=save,
-                                              modelPath="../model/flops_time_cuda.m")
+                                              modelPath="../model/flops_time_mac.m")
     #
     ones = torch.ones(len(flops))
     x = np.c_[ones,flops2,params2]
-    functionImg.myPolynomialRegression(x,times,"y_real","y_predict",save=save,modelPath="../model/flops_params_time_cuda.m")
+    functionImg.myPolynomialRegression(x,times,"y_real","y_predict",save=save,modelPath="../model/flops_params_time_mac.m")
 
 
 
 def compare_alexnet():
-    device = "cuda" if torch.cuda.is_available() else "cpu"
+    device = "cpu"
+    # device = "cuda" if torch.cuda.is_available() else "cpu"
 
-    flops_predict_model = joblib.load("../model/flops_time_cuda.m")
-    flops_params_predict_model = joblib.load("../model/flops_params_time_cuda.m")
+    flops_predict_model = joblib.load("../model/flops_time_mac.m")
+    flops_params_predict_model = joblib.load("../model/flops_params_time_mac.m")
 
-    model = function.getDnnModel(2)
+    model = function.getDnnModel(1)
     model = model.to(device)
 
     x = torch.rand(size=(1, 3, 224, 224))
@@ -161,7 +162,14 @@ def compare_alexnet():
         layer = model[i]
         if isinstance(layer, nn.ReLU) or isinstance(layer, nn.BatchNorm2d) or isinstance(layer, nn.Dropout):
             continue
-        now_x, myTime = function.recordTimeGpu(layer, now_x, device, epoch)
+
+        if device == "cuda":
+            now_x, myTime = function.recordTimeGpu(layer, now_x, device, epoch)
+        elif device == "cpu":
+            now_x, myTime = function.recordTimeCpu(layer, now_x, device, epoch)
+        else:
+            myTime = 0
+
         time.sleep(1)
         flops = model_features.get_layer_FLOPs(layer, now_x)
         params = model_features.get_layer_Params(layer, now_x)
@@ -184,12 +192,12 @@ def compare_alexnet():
 
 
 if __name__ == '__main__':
-    save_flag = True
-    get_predict_data(save_flag)
+    save_flag = False
+    # get_predict_data(save_flag)
 
     # get_predict_model()
 
-    # compare_alexnet()
+    compare_alexnet()
 
 
 
