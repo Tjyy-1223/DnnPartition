@@ -11,7 +11,8 @@ import torch.nn as nn
 import numpy as np
 
 
-def show_FLOPs_features_gpu(model,x,device="cuda",epoch=300,save_flag=False,Path=None,sheetname=None):
+def show_FLOPs_features(model,x,epoch=300,save_flag=False,Path=None,sheetname=None):
+    device = "cuda" if torch.cuda.is_available() else "cpu"
     model_len = len(model)
 
     flops_list = []
@@ -33,6 +34,8 @@ def show_FLOPs_features_gpu(model,x,device="cuda",epoch=300,save_flag=False,Path
             now_x, myTime = function.recordTimeGpu(layer, now_x, device, epoch)
         if device == "cpu":
             now_x, myTime = function.recordTimeCpu(layer, now_x, device, epoch)
+        else:
+            myTime = 0.0
 
         time.sleep(1)
         flops = model_features.get_layer_FLOPs(layer, now_x)
@@ -61,7 +64,7 @@ def show_FLOPs_features_gpu(model,x,device="cuda",epoch=300,save_flag=False,Path
 def get_predict_data(save_flag = False):
     save_flag = save_flag
     path = "../res/computation_time.xls"
-    sheet_name = "mac_one"
+    sheet_name = "mac_one1"
     value = [["flops", "params","flops2","params2","times",]]
     if save_flag:
         function.create_excel_xsl(path, sheet_name, value)
@@ -85,7 +88,7 @@ def get_predict_data(save_flag = False):
                 function.warmUpCpu(model,x,device)
 
             # function.show_features_gpu(alexnet,x)
-            my_flops, my_params, my_times = show_FLOPs_features_gpu(model,x,save_flag=save_flag,Path=path,sheetname=sheet_name)
+            my_flops, my_params, my_times = show_FLOPs_features(model,x,save_flag=save_flag,Path=path,sheetname=sheet_name)
             flops.extend(my_flops)
             params.extend(my_params)
             times.extend(my_times)
