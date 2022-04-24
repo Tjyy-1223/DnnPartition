@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt
 import numpy as np
+import torch
 from sklearn.linear_model import LinearRegression
 from sklearn import metrics
 from sklearn.preprocessing import PolynomialFeatures
@@ -319,5 +320,20 @@ def predictConv2dTime(model,conv2d,input_data):
     computation_number = output_map * output_map * conv2d.in_channels * conv2d.out_channels * kernel_size * kernel_size
     input_features = np.array([computation_number]).reshape(-1, 1)
 
+    computation_time = model.predict(input_features)[0]
+    return computation_time
+
+
+def predictFlopsTime(model,flops):
+    input_features = myTransform(np.array([flops]), degree=2)
+    computation_time = model.predict(input_features)[0]
+    return computation_time
+
+
+def predictFlopsParamsTime(model,flops,params):
+    flops = np.array(flops)
+    params = np.array(params)
+    ones = torch.ones(1)
+    input_features = np.c_[ones,flops,params]
     computation_time = model.predict(input_features)[0]
     return computation_time
