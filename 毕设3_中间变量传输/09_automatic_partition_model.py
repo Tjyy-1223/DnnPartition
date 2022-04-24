@@ -2,27 +2,7 @@ import joblib
 import torch
 import function
 import functionImg
-import a2_vggNet
 import torch.nn as nn
-import a1_alexNet
-
-def addList(mylist):
-    for i in range(len(mylist)):
-        if i == 0:
-            continue
-        else:
-            mylist[i] = mylist[i-1] + mylist[i]
-    return mylist
-
-
-def addListReverse(mylist):
-    length = len(mylist)
-    for i in range(length-1,-1,-1):
-        if i == length - 1:
-            continue
-        else:
-            mylist[i] = mylist[i+1] + mylist[i]
-    return mylist
 
 
 if __name__ == '__main__':
@@ -55,7 +35,7 @@ if __name__ == '__main__':
     input_data = input_data.to(device)
 
     # alexnet = a1_alexNet.AlexNet()
-    alexnet = a2_vggNet.vgg16()
+    alexnet = function.getDnnModel(2)
     alexnet = alexnet.to(device)
 
     # function.show_features_gpu(alexnet,input_data)
@@ -106,7 +86,6 @@ if __name__ == '__main__':
             layerName.append(f"{layer}")
             shape_list.append(f"{x.shape}")
             transport_list.append(functionImg.predictTransportTime(transportModel,x))
-    # cloud_latency.append(0.0)
 
     # for i in range(len(layerName)):
     #     print(layerName[i])
@@ -122,8 +101,8 @@ if __name__ == '__main__':
     transport_latency_predict.extend(transport_list)
 
 
-    dge_latency_predict = addList(edge_latency_predict)
-    cloud_latency_predict = addListReverse(cloud_latency_predict)
+    dge_latency_predict = function.addList(edge_latency_predict)
+    cloud_latency_predict = function.addListReverse(cloud_latency_predict)
 
 
     real_partition = 0

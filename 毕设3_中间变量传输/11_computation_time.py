@@ -136,11 +136,11 @@ def get_predict_model():
 
 
 def compare_alexnet():
-    device = "cpu"
-    # device = "cuda" if torch.cuda.is_available() else "cpu"
+    # device = "cpu"
+    device = "cuda" if torch.cuda.is_available() else "cpu"
 
-    flops_predict_model = joblib.load("../model/flops_time_mac.m")
-    flops_params_predict_model = joblib.load("../model/flops_params_time_mac.m")
+    flops_predict_model = joblib.load("../model/flops_time_cuda.m")
+    flops_params_predict_model = joblib.load("../model/flops_params_time_cuda.m")
 
     model = function.getDnnModel(1)
     model = model.to(device)
@@ -164,7 +164,11 @@ def compare_alexnet():
     for i in range(len(model)):
         layer = model[i]
         if isinstance(layer, nn.ReLU) or isinstance(layer, nn.BatchNorm2d) or isinstance(layer, nn.Dropout):
+            now_x = layer(now_x)
             continue
+
+        flops = model_features.get_layer_FLOPs(layer, now_x)
+        params = model_features.get_layer_Params(layer, now_x)
 
         if device == "cuda":
             now_x, myTime = function.recordTimeGpu(layer, now_x, device, epoch)
@@ -174,8 +178,7 @@ def compare_alexnet():
             myTime = 0
 
         time.sleep(1)
-        flops = model_features.get_layer_FLOPs(layer, now_x)
-        params = model_features.get_layer_Params(layer, now_x)
+
 
         computation_time += myTime
         flops_sum += flops
