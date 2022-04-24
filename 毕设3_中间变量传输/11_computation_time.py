@@ -148,7 +148,10 @@ def compare_alexnet():
     x = torch.rand(size=(1, 3, 224, 224))
     x = x.to(device)
 
-    function.warmUpGpu(model, x, device)
+    if device == "cuda":
+        now_x, myTime = function.recordTimeGpu(model, x, device, 3)
+    elif device == "cpu":
+        now_x, myTime = function.recordTimeCpu(model, x, device, 3)
 
 
     flops_sum = 0.0
