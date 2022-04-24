@@ -131,7 +131,7 @@ def compare_alexnet():
     flops_predict_model = joblib.load("../model/flops_time_cuda.m")
     flops_params_predict_model = joblib.load("../model/flops_params_time_cuda.m")
 
-    model = function.getDnnModel(1)
+    model = function.getDnnModel(2)
     model = model.to(device)
 
     x = torch.rand(size=(1, 3, 224, 224))
