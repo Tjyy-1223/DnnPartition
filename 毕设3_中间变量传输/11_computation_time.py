@@ -1,5 +1,5 @@
 import time
-
+from sklearn.preprocessing import MinMaxScaler
 import joblib
 
 import function
@@ -7,6 +7,7 @@ import functionImg
 import model_features
 import a1_alexNet
 import torch
+import torch.nn as nn
 import numpy as np
 
 
@@ -25,6 +26,8 @@ def show_FLOPs_features_gpu(model,x,device="cuda",epoch=300,save_flag=False,Path
 
     for i in range(model_len):
         layer = model[i]
+        if isinstance(layer, nn.ReLU) or isinstance(layer, nn.BatchNorm2d) or isinstance(layer, nn.Dropout):
+            continue
         now_x, myTime = function.recordTimeGpu(layer, now_x, device, epoch)
         time.sleep(1)
         flops = model_features.get_layer_FLOPs(layer, now_x)
@@ -49,10 +52,11 @@ def show_FLOPs_features_gpu(model,x,device="cuda",epoch=300,save_flag=False,Path
     return flops_list,params_list,time_list
 
 
+
 def get_predict_data(save_flag = False):
     save_flag = save_flag
     path = "../res/computation_time.xls"
-    sheet_name = "cuda"
+    sheet_name = "cuda_one"
     value = [["flops", "params","flops2","params2","times",]]
     if save_flag:
         function.create_excel_xsl(path, sheet_name, value)
@@ -61,16 +65,17 @@ def get_predict_data(save_flag = False):
     flops = []
     params = []
     times = []
-    for i in range(2):
+    for i in range(1):
         for i in range(1, 3):
+        # for i in range(2, 3):
             model = function.getDnnModel(i)
             model = model.to(device)
 
             x = torch.rand(size=(1, 3, 224, 224))
             x = x.to(device)
 
-            if i == 1:
-                function.warmUpGpu(model, x, device)
+
+            function.warmUpGpu(model, x, device)
 
             # function.show_features_gpu(alexnet,x)
             my_flops, my_params, my_times = show_FLOPs_features_gpu(model,x,save_flag=save_flag,Path=path,sheetname=sheet_name)
@@ -78,20 +83,45 @@ def get_predict_data(save_flag = False):
             params.extend(my_params)
             times.extend(my_times)
 
+
+
+
+
+
+
+def get_predict_model():
+    mm = MinMaxScaler()
+    path = "../res/computation_time.xls"
+    sheet_name = "cuda_one"
+
+    flops = function.get_excel_data(path,sheet_name,"flops")
+    flops2 = function.get_excel_data(path,sheet_name,"flops2")
+    params = function.get_excel_data(path,sheet_name,"params")
+    params2 = function.get_excel_data(path,sheet_name,"params2")
+    times = function.get_excel_data(path,sheet_name,"times")
+
     flops = np.array(flops)
+    flops2 = np.array(flops2)
     params = np.array(params)
+    params2 = np.array(params2)
     times = np.array(times)
 
     # functionImg.getScatterImg(flops,times,"flops","times(ms)")
+    # functionImg.getScatterImg(flops2,times,"flops2","times(ms)")
     # functionImg.getScatterImg(params,times,"params","times(ms)")
+    # functionImg.getScatterImg(params2,times,"params2","times(ms)")
 
-    # model_Path = "../model/flops_time_cuda.m"
-    # functionImg.myPolynomialRegression_single(flops,times,"flops","times(ms)",degree=2,save=False,modelPath="../model/flops_time_cuda.m")
-    # functionImg.myPolynomialRegression_single(flops,times,"flops","times(ms)",degree=3)
+    save = False
+    # functionImg.myPolynomialRegression_single(flops2,times,"flops","times(ms)",degree=2,save=save,
+    #                                           modelPath="../model/flops_time_cuda.m")
+    # functionImg.myPolynomialRegression_single(flops2,times,"flops","times(ms)",degree=3)
+
+    functionImg.myPolynomialRegression_single(flops2, times, "flops", "times(ms)", degree=2, save=save,
+                                              modelPath="../model/flops_time_cuda.m")
     #
-    # ones = torch.ones(len(flops))
-    # x = np.c_[ones,flops,params]
-    # functionImg.myPolynomialRegression(x,times,"y_real","y_predict",save=False,modelPath="../model/flops_params_time_cuda.m")
+    ones = torch.ones(len(flops))
+    x = np.c_[ones,flops2,params2]
+    functionImg.myPolynomialRegression(x,times,"y_real","y_predict",save=save,modelPath="../model/flops_params_time_cuda.m")
 
 
 
@@ -119,6 +149,8 @@ def compare_alexnet():
     index = 0
     for i in range(len(model)):
         layer = model[i]
+        if isinstance(layer, nn.ReLU) or isinstance(layer, nn.BatchNorm2d) or isinstance(layer, nn.Dropout):
+            continue
         now_x, myTime = function.recordTimeGpu(layer, now_x, device, epoch)
         time.sleep(1)
         flops = model_features.get_layer_FLOPs(layer, now_x)
@@ -131,9 +163,9 @@ def compare_alexnet():
         print(f"{index} - {layer}   computation number : {flops} \t params : {params} \t layer computation time : {myTime:.3f} (ms)")
 
 
-        print(f"flops: {flops_sum}  \t  params: {params_sum}  \t  computation time: {computation_time:.3f} (ms)")
-        print(f"flops predict : {functionImg.predictFlopsTime(flops_predict_model,flops_sum):.3f} \t "
-              f"flops params predict : {functionImg.predictFlopsParamsTime(flops_params_predict_model,flops_sum,params_sum):.3f}")
+        print(f"flops: {flops_sum}  \t  params: {params_sum}  \t  computation time: {computation_time:.3f} (ms) \t "
+              f"flops predict : {functionImg.predictFlopsTime(flops_predict_model,flops_sum/10000):.3f} \t "
+              f"flops params predict : {functionImg.predictFlopsParamsTime(flops_params_predict_model,flops_sum/10000,params_sum/10000):.3f}")
         print("=============================================================")
         index += 1
 
@@ -143,8 +175,11 @@ def compare_alexnet():
 
 if __name__ == '__main__':
     save_flag = True
-    get_predict_data(save_flag)
-    # compare_alexnet()
+    # get_predict_data(save_flag)
+
+    # get_predict_model()
+
+    compare_alexnet()
 
 
 

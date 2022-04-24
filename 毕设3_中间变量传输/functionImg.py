@@ -3,7 +3,7 @@ import numpy as np
 import torch
 from sklearn.linear_model import LinearRegression
 from sklearn import metrics
-from sklearn.preprocessing import PolynomialFeatures
+from sklearn.preprocessing import PolynomialFeatures, MinMaxScaler
 from sklearn.linear_model import Ridge
 import joblib
 
@@ -325,7 +325,9 @@ def predictConv2dTime(model,conv2d,input_data):
 
 
 def predictFlopsTime(model,flops):
-    input_features = myTransform(np.array([flops]), degree=2)
+    flops = np.array(flops)
+
+    input_features = myTransform(flops, degree=2)
     computation_time = model.predict(input_features)[0]
     return computation_time
 
@@ -333,6 +335,7 @@ def predictFlopsTime(model,flops):
 def predictFlopsParamsTime(model,flops,params):
     flops = np.array(flops)
     params = np.array(params)
+
     ones = torch.ones(1)
     input_features = np.c_[ones,flops,params]
     computation_time = model.predict(input_features)[0]
