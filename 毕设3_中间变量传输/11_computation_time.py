@@ -28,7 +28,12 @@ def show_FLOPs_features_gpu(model,x,device="cuda",epoch=300,save_flag=False,Path
         layer = model[i]
         if isinstance(layer, nn.ReLU) or isinstance(layer, nn.BatchNorm2d) or isinstance(layer, nn.Dropout):
             continue
-        now_x, myTime = function.recordTimeGpu(layer, now_x, device, epoch)
+
+        if device == "cuda":
+            now_x, myTime = function.recordTimeGpu(layer, now_x, device, epoch)
+        if device == "cpu":
+            now_x, myTime = function.recordTimeCpu(layer, now_x, device, epoch)
+
         time.sleep(1)
         flops = model_features.get_layer_FLOPs(layer, now_x)
         params = model_features.get_layer_Params(layer, now_x)
@@ -56,7 +61,7 @@ def show_FLOPs_features_gpu(model,x,device="cuda",epoch=300,save_flag=False,Path
 def get_predict_data(save_flag = False):
     save_flag = save_flag
     path = "../res/computation_time.xls"
-    sheet_name = "cuda_one"
+    sheet_name = "mac_one"
     value = [["flops", "params","flops2","params2","times",]]
     if save_flag:
         function.create_excel_xsl(path, sheet_name, value)
@@ -74,8 +79,10 @@ def get_predict_data(save_flag = False):
             x = torch.rand(size=(1, 3, 224, 224))
             x = x.to(device)
 
-
-            function.warmUpGpu(model, x, device)
+            if device == "cuda":
+                function.warmUpGpu(model, x, device)
+            if device == "cpu":
+                function.warmUpCpu(model,x,device)
 
             # function.show_features_gpu(alexnet,x)
             my_flops, my_params, my_times = show_FLOPs_features_gpu(model,x,save_flag=save_flag,Path=path,sheetname=sheet_name)
@@ -175,11 +182,11 @@ def compare_alexnet():
 
 if __name__ == '__main__':
     save_flag = True
-    # get_predict_data(save_flag)
+    get_predict_data(save_flag)
 
     # get_predict_model()
 
-    compare_alexnet()
+    # compare_alexnet()
 
 
 
