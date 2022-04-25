@@ -8,8 +8,8 @@ import a1_alexNet
 
 
 def alexNetPrediction():
-    # lin_reg = joblib.load("../model/transformTime.m")
-    lin_reg = joblib.load("../model/tranportTime_fast.m")
+    lin_reg = joblib.load("../model/transformTime.m")
+    # lin_reg = joblib.load("../model/tranportTime_fast.m")
 
     """
     x = [28224,44100,63504,86436,112896,142884,176400,213444,254016,298116,345744,396900,451584]
