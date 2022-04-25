@@ -1,5 +1,8 @@
 import joblib
+import numpy as np
 import torch
+from matplotlib import pyplot as plt
+
 import function
 import functionImg
 import torch.nn as nn
@@ -120,6 +123,8 @@ def showDnnPartition(model_index):
     real_min_time = end_to_end_latency[0]
     predict_partition = 0
     predict_min_time = edge_latency_predict[0] + transport_latency_predict[0] + cloud_latency_predict[0]
+
+    end_to_end_predict = []
     for i in range(len(layerName_exl)):
         print(layerName_exl[i])
         print(
@@ -128,6 +133,7 @@ def showDnnPartition(model_index):
         print(
             f"predict  :  shape:{shape[i]}\t\tedge latency:{edge_latency_predict[i]:.3f} ms\t\ttransport time:{transport_latency_predict[i]:.3f} ms\t\t"
             f"cloud latency{cloud_latency_predict[i]:.3f} ms\t\tend to end latency:{edge_latency_predict[i] + transport_latency_predict[i] + cloud_latency_predict[i]:.3f} ms")
+        end_to_end_predict.append(edge_latency_predict[i] + transport_latency_predict[i] + cloud_latency_predict[i])
         if end_to_end_latency[i] < real_min_time:
             real_partition = i
             real_min_time = end_to_end_latency[i]
@@ -140,12 +146,51 @@ def showDnnPartition(model_index):
           f"   best time : {end_to_end_latency[real_partition]:.3f}")
     print(f"predict partition point : {predict_partition}  layer name: {layerName_exl[predict_partition]}"
           f"   best time : {edge_latency_predict[predict_partition] + transport_latency_predict[predict_partition] + cloud_latency_predict[predict_partition]:.3f}")
+    return end_to_end_latency,end_to_end_predict
 
+
+def getImg(true_time,predict_time):
+    # true_time = [119.166, 148.398, 35.81, 105.005, 28.324, 41.525, 35.808, 54.218, 17.055, 8.159, 11.091, 6.177, 6.047,
+    #              0.18]
+    # predict_time = [85.930, 110.725, 30.219, 80.007, 23.026, 39.600, 28.492, 28.492, 11.475, 11.475, 11.475, 8.964,
+    #                 8.964, 7.452]
+
+    # print(index)
+    # print(times)
+
+    ind = np.arange(len(true_time))  # the x locations for the groups
+    width = 0.35  # the width of the bars
+
+    fig = plt.figure(figsize=(8, 3.5))
+    ax1 = fig.add_subplot(111)
+    ax1.xaxis.set_ticks_position('bottom')
+    ax1.set_xticks(ind)
+    # ax1.set_xticklabels(('input', 'conv1', 'maxPool2d1', 'conv2', 'maxPool2d2', 'conv3',
+    #                      'conv4', 'conv5', 'maxPool2d3', 'avgPool2d', 'flatten',
+    #                      'linear1', 'linear2', 'linear3'), rotation=-45)
+    ax1.get_xaxis().set_visible(False)  # 隐藏x坐标轴
+
+    lns1 = ax1.bar(ind - width / 2, true_time, width, color='olivedrab',label='real time')
+
+    # Add some text for labels, title and custom x-axis tick labels, etc.
+    # ax.set_ylabel('Scores')
+
+    lns2 = ax1.bar(ind + width / 2, predict_time, width, color='goldenrod', label='predict time')
+
+    fig.legend(loc=1, bbox_to_anchor=(1, 1), bbox_transform=ax1.transAxes)
+    # ax1.title("")
+    ax1.set_ylabel('End-to-end Latency(ms)')
+
+    # plt.ticklabel_format(style='sci', axis='y', scilimits=(0, 0), useMathText=True)
+    plt.title("Vgg16Net")
+    plt.tight_layout()
+    plt.show()
 
 
 if __name__ == '__main__':
-    model_index = 1
-    showDnnPartition(model_index)
+    model_index = 2
+    end_to_end_latency,end_to_end_predict = showDnnPartition(model_index)
+    getImg(end_to_end_latency,end_to_end_predict)
 
 
 

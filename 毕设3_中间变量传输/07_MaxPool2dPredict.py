@@ -75,7 +75,7 @@ if __name__ == '__main__':
     save_flag = False
     modelPath = "../model/maxPool2dTime_mac.m"
 
-    # functionImg.getScatterImg(computation_number, y, "output's shape * kernel_size^2", labely)
+    functionImg.getScatterImg(computation_number, y, "output's shape * kernel_size^2", labely)
     # functionImg.getScatterImg(computation_number/kernel_size, y, "output's shape * kernel_size", labely)
     # functionImg.getScatterImg(computation_number / kernel_size /kernel_size, y,"output's shape", labely)
 
@@ -105,8 +105,8 @@ if __name__ == '__main__':
     """
     # functionImg.myLinearRegression(computation_number / kernel_size /kernel_size, y, "output's shape", labely,save_flag, modelPath)
 
-    compareData_cuda()
+    # compareData_cuda()
 
 
-    compareData_mac()
+    # compareData_mac()
 

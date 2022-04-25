@@ -111,27 +111,27 @@ def get_predict_model():
     times = function.get_excel_data(path,sheet_name,"times")
 
     flops = np.array(flops)
-    flops2 = np.array(flops2)
+    flops2 = np.array(flops2[:14])
     params = np.array(params)
-    params2 = np.array(params2)
-    times = np.array(times)
+    params2 = np.array(params2[:14])
+    times = np.array(times[:14])
 
     # functionImg.getScatterImg(flops,times,"flops","times(ms)")
-    # functionImg.getScatterImg(flops2,times,"flops2","times(ms)")
+    functionImg.getScatterImg(flops2,times,"FLOPs","Latency(ms)")
     # functionImg.getScatterImg(params,times,"params","times(ms)")
-    # functionImg.getScatterImg(params2,times,"params2","times(ms)")
+    functionImg.getScatterImg(params2,times,"Params","Latency(ms)")
 
-    save = True
+    save = False
     # functionImg.myPolynomialRegression_single(flops2,times,"flops","times(ms)",degree=2,save=save,
     #                                           modelPath="../model/flops_time_cuda.m")
     # functionImg.myPolynomialRegression_single(flops2,times,"flops","times(ms)",degree=3)
 
-    functionImg.myPolynomialRegression_single(flops2, times, "flops", "times(ms)", degree=2, save=save,
-                                              modelPath="../model/flops_time_mac.m")
-    #
-    ones = torch.ones(len(flops))
-    x = np.c_[ones,flops2,params2]
-    functionImg.myPolynomialRegression(x,times,"y_real","y_predict",save=save,modelPath="../model/flops_params_time_mac.m")
+    # functionImg.myPolynomialRegression_single(flops2, times, "flops", "times(ms)", degree=2, save=save,
+    #                                           modelPath="../model/flops_time_mac.m")
+    # #
+    # ones = torch.ones(len(flops))
+    # x = np.c_[ones,flops2,params2]
+    # functionImg.myPolynomialRegression(x,times,"y_real","y_predict",save=save,modelPath="../model/flops_params_time_mac.m")
 
 
 
@@ -201,9 +201,9 @@ if __name__ == '__main__':
     save_flag = False
     # get_predict_data(save_flag)
 
-    # get_predict_model()
+    get_predict_model()
 
-    compare_alexnet()
+    # compare_alexnet()
 
 
 

@@ -106,7 +106,8 @@ if __name__ == '__main__':
     out_channel = np.array(out_channel)
     out_map = np.array(out_map)
 
-    number = in_channel * out_channel * kernel_size * kernel_size * out_map * out_map
+    # number = in_map * in_map * in_channel * (kernel_size/stride) * (kernel_size/stride) * out_channel
+    number = out_map * out_map * in_channel * (kernel_size/stride) * (kernel_size/stride) * out_channel
     y = np.array(computation_time)
 
     one = np.ones(len(in_channel))
