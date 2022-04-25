@@ -19,7 +19,7 @@ if __name__ == '__main__':
     # print(times)
 
 
-    plt.figure(figsize=(12,7.5))
+    plt.figure(figsize=(8,3.5))
     N = len(index)
     ind = np.arange(N)  # the x locations for the groups
     width = 0.35  # the width of the bars: can also be len(x) sequence
@@ -36,5 +36,5 @@ if __name__ == '__main__':
     # plt.legend((p1[0], p2[0]), ('Men', 'Women'))
     for a, b in zip(ind,times):
         plt.text(a, b + 0.02, '%.3f' % b, ha='center', va='bottom', fontsize=7)
-
+    plt.tight_layout()
     plt.show()

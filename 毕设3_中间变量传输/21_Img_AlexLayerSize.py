@@ -19,14 +19,14 @@ if __name__ == '__main__':
     # print(times)
 
 
-    plt.figure(figsize=(12,7.5))
+    plt.figure(figsize=(8,3.5))
     N = len(index)
     ind = np.arange(N)  # the x locations for the groups
     width = 0.35  # the width of the bars: can also be len(x) sequence
 
     p1 = plt.bar(ind, transport_num, width,color="darkblue")
-    plt.ylabel('Computation Time(ms)')
-    plt.title('Layer Size of AlexNet')
+    plt.ylabel('Transport Length')
+    plt.title('Transport Length of AlexNet')
     plt.xticks(ind, ('conv1', 'maxPool2d1', 'conv2', 'maxPool2d2', 'conv3',
                      'conv4', 'conv5', 'maxPool2d3', 'avgPool2d', 'flatten',
                      'linear1', 'linear2', 'linear3'))
@@ -38,5 +38,5 @@ if __name__ == '__main__':
         plt.text(a, b + 0.02, '%d' % b, ha='center', va='bottom', fontsize=7)
 
     plt.ticklabel_format(style='sci', axis='y', scilimits=(0, 0), useMathText=True)
-
+    plt.tight_layout()
     plt.show()
