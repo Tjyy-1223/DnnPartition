@@ -11,6 +11,8 @@ if __name__ == '__main__':
     model = function.getDnnModel(modelIndex)
     model.to(device)
 
-    function.warmUpGpu(model,x,device)
-    x,mytime = function.recordTimeGpu(model,x,device,300)
+    # function.warmUpGpu(model,x,device)
+    function.warmUpCpu(model,x,device)
+    # x,mytime = function.recordTimeGpu(model,x,device,300)
+    x,mytime = function.recordTimeCpu(model,x,device,300)
     print(mytime)
