@@ -176,6 +176,7 @@ def get_depthwise_separable_conv2d_Params(conv2d_layer,x):
     params = depthwise_params + pointwise_params
     return params
 
+
 def get_expansion_block_FLOPs(conv2d_layer,x,Cexp):
     in_channel = conv2d_layer.in_channels
     out_channel = conv2d_layer.out_channels

@@ -5,6 +5,7 @@ import threading
 import xlrd
 import xlwt
 from xlutils.copy import copy
+import pickle
 
 import a1_alexNet
 import a2_vggNet
@@ -80,7 +81,7 @@ def show_features_gpu(alexnet, x ,filter = True,epoch = 3,save = False,model_nam
 
     if save:
         sheet_name = model_name
-        value = [["index", "layerName","computation_time(ms)","output_shape","transport_num","transport_size(MB)"]]
+        value = [["index", "layerName","computation_time(ms)","output_shape","params","size","transport_num","transport_size(MB)"]]
         create_excel_xsl(path,sheet_name,value)
 
     if len(alexnet) > 0:
@@ -119,7 +120,12 @@ def show_features_gpu(alexnet, x ,filter = True,epoch = 3,save = False,model_nam
 
             if save:
                 sheet_name = model_name
-                value = [[idx, f"{layer}", round((all_time / epoch), 3), f"{x.shape}", total_num,round(size, 3)]]
+                # value = [
+                #     ["index", "layerName", "computation_time(ms)", "output_shape", "params",
+                #      "size", "transport_num","transport_size(MB)"]]
+                pytorch_total_params = sum(p.numel() for p in layer.parameters())
+                value = [[idx, f"{layer}", round((all_time / epoch), 3), f"{x.shape}",pytorch_total_params,
+                          total_num,len(pickle.dumps(x)),round(size, 3)]]
                 write_excel_xls_append(path,sheet_name,value)
             # 计算各层的结构所包含的参数量 主要与计算时延相关
             # para = parameters.numel()
