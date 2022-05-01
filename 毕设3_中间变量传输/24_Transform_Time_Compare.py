@@ -22,12 +22,12 @@ if __name__ == '__main__':
     ax1.set_xticklabels(('input','conv1', 'maxPool2d1', 'conv2', 'maxPool2d2', 'conv3',
                      'conv4', 'conv5', 'maxPool2d3', 'avgPool2d', 'flatten',
                      'linear1', 'linear2', 'linear3'),rotation = -45)
-    lns1 = ax1.bar(ind - width / 2, true_time, width, label='real time')
+    lns1 = ax1.bar(ind - width / 2, true_time, width, label='Real Latency')
 
     # Add some text for labels, title and custom x-axis tick labels, etc.
     # ax.set_ylabel('Scores')
 
-    lns2 = ax1.bar(ind + width / 2, predict_time, width, color='darkblue', label='predict time')
+    lns2 = ax1.bar(ind + width / 2, predict_time, width, color='darkblue', label='Predict Latency')
 
 
     fig.legend(loc=1, bbox_to_anchor=(1,1), bbox_transform=ax1.transAxes)
