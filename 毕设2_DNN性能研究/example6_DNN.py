@@ -30,15 +30,15 @@ def getDnnModel(index):
 
 
 if __name__ == '__main__':
-    # device = "cuda" if torch.cuda.is_available() else "cpu"
-    device = "cpu"
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+    # device = "cpu"
     print(device)
 
     x = torch.rand(size=(1, 3, 224, 224))
     x = x.to(device)
     print(f"x device : {x.device}")
 
-    modelIndex = 2
+    modelIndex = 4
     model_names = ["alexnet","vgg16","googLeNet","resnet18","mobileNetv2"]
     model_name = model_names[modelIndex-1]
     model = getDnnModel(modelIndex)
@@ -48,7 +48,7 @@ if __name__ == '__main__':
     temp_x = x
     epoch = 300
     save_flag = False
-    filter = False
+    filter = True
     path = "../res/DnnLayer_mac_power_all.xls"
     if device == "cpu":
         x = function.show_features_cpu(model, x, filter=filter ,epoch=epoch,save=save_flag,model_name=model_name,path=path)

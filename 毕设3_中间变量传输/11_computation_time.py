@@ -249,7 +249,7 @@ def test_model(save_flag = False):
     params = []
     times = []
     for i in range(1,2):
-        for i in range(3, 4):
+        for i in range(4, 5):
             model = function.getDnnModel(i)
             model = model.to(device)
 

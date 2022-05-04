@@ -1,5 +1,7 @@
 import torch.nn as nn
 import a3_GoogLeNet
+import a4_ResNet
+import a5_MobileNet
 
 def get_model_FLOPs(model,x):
     flops = 0.0
@@ -59,6 +61,9 @@ def get_layer_FLOPs(layer,x):
     elif isinstance(layer, a3_GoogLeNet.Inception):
         flops = get_Inception_FLOPs(layer,x)
 
+    elif isinstance(layer,a4_ResNet.BasicBlock):
+        flops = get_BasicBlock_FLOPs(layer,x)
+
     else:
         flops = 0
         raise InterruptedError
@@ -92,6 +97,9 @@ def get_layer_Params(layer,x):
 
     elif isinstance(layer, a3_GoogLeNet.Inception):
         flops = get_Inception_Params(layer,x)
+
+    elif isinstance(layer,a4_ResNet.BasicBlock):
+        flops = get_BasicBlock_Params(layer,x)
 
     else:
         flops = 0
@@ -274,3 +282,43 @@ def get_Inception_Params(block,x):
            + get_model_Params(branch2, x) \
            + get_model_Params(branch3, x) \
            + get_model_Params(branch4, x)
+
+
+
+def get_BasicBlock_FLOPs(block,x):
+    conv1 = block.conv1
+    bn1 = block.bn1
+    relu = block.relu
+    conv2 = block.conv2
+    bn2 = block.bn2
+    child_model1 = nn.Sequential(
+        conv1,bn1,relu,conv2,bn2
+    )
+
+    """1x1卷积核"""
+    downsample = block.downsample
+
+    if downsample is not None:
+        return get_model_FLOPs(child_model1,x) + get_model_FLOPs(downsample,x)
+    else:
+        return get_model_FLOPs(child_model1,x)
+
+
+
+def get_BasicBlock_Params(block,x):
+    conv1 = block.conv1
+    bn1 = block.bn1
+    relu = block.relu
+    conv2 = block.conv2
+    bn2 = block.bn2
+    child_model1 = nn.Sequential(
+        conv1, bn1, relu, conv2, bn2
+    )
+
+    """1x1卷积核"""
+    downsample = block.downsample
+
+    if downsample is not None:
+        return get_model_Params(child_model1, x) + get_model_Params(downsample, x)
+    else:
+        return get_model_Params(child_model1, x)
