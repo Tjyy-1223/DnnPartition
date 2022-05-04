@@ -5,29 +5,47 @@ import a5_MobileNet
 
 def get_model_FLOPs(model,x):
     flops = 0.0
-    for i in range(len(model)):
-        layer = model[i]
 
-        if isinstance(layer, nn.ReLU) or isinstance(layer, nn.BatchNorm2d) or isinstance(layer, nn.Dropout):
+    if isinstance(model,nn.Sequential):
+        for i in range(len(model)):
+            layer = model[i]
+
+            if isinstance(layer, nn.ReLU) or isinstance(layer, nn.BatchNorm2d) or isinstance(layer, nn.Dropout):
+                x = layer(x)
+                continue
+
+            flops += get_layer_FLOPs(layer,x)
             x = layer(x)
-            continue
 
-        flops += get_layer_FLOPs(layer,x)
-        x = layer(x)
+    else:
+        if isinstance(model, nn.ReLU) or isinstance(model, nn.BatchNorm2d) or isinstance(model, nn.Dropout):
+            flops = 0.0
+        else:
+            flops = get_layer_FLOPs(model,x)
+
     return flops
 
 
 def get_model_Params(model,x):
     params = 0.0
-    for i in range(len(model)):
-        layer = model[i]
 
-        if isinstance(layer, nn.ReLU) or isinstance(layer, nn.BatchNorm2d) or isinstance(layer, nn.Dropout):
+    if isinstance(model, nn.Sequential):
+        for i in range(len(model)):
+            layer = model[i]
+
+            if isinstance(layer, nn.ReLU) or isinstance(layer, nn.BatchNorm2d) or isinstance(layer, nn.Dropout):
+                x = layer(x)
+                continue
+
+            params += get_layer_Params(layer,x)
             x = layer(x)
-            continue
 
-        params += get_layer_Params(layer,x)
-        x = layer(x)
+    else:
+        if isinstance(model, nn.ReLU) or isinstance(model, nn.BatchNorm2d) or isinstance(model, nn.Dropout):
+            params = 0.0
+        else:
+            params = get_layer_Params(model,x)
+
     return params
 
 
@@ -38,7 +56,10 @@ def get_layer_FLOPs(layer,x):
         flops = get_linear_FLOPs(layer)
 
     elif isinstance(layer, nn.Conv2d):
-        flops = get_conv2d_FLOPs(layer,x)
+        if layer.groups == 1:
+            flops = get_conv2d_FLOPs(layer,x)
+        else:
+            flops = get_depthwise_separable_conv2d_FLOPs(layer,x)
 
     elif isinstance(layer, nn.MaxPool2d):
         flops = get_maxpool2d_FLOPs(layer,x)
@@ -64,6 +85,12 @@ def get_layer_FLOPs(layer,x):
     elif isinstance(layer,a4_ResNet.BasicBlock):
         flops = get_BasicBlock_FLOPs(layer,x)
 
+    elif isinstance(layer,a5_MobileNet.ConvNormActivation):
+        flops = get_ConvNormActivation_FLOPs(layer,x)
+
+    elif isinstance(layer,a5_MobileNet.InvertedResidual):
+        flops = get_InvertedResidual_FLOPs(layer,x)
+
     else:
         flops = 0
         raise InterruptedError
@@ -72,39 +99,48 @@ def get_layer_FLOPs(layer,x):
 
 def get_layer_Params(layer,x):
     if isinstance(layer, nn.Linear):
-        flops = get_linear_Params(layer)
+        params = get_linear_Params(layer)
 
     elif isinstance(layer, nn.Conv2d):
-        flops = get_conv2d_Params(layer,x)
+        if layer.groups == 1:
+            params = get_conv2d_Params(layer,x)
+        else:
+            params = get_depthwise_separable_conv2d_Params(layer,x)
 
     elif isinstance(layer, nn.MaxPool2d):
-        flops = get_maxpool2d_Params()
+        params = get_maxpool2d_Params()
 
     elif isinstance(layer,nn.Dropout):
-        flops = get_dropout_Params()
+        params = get_dropout_Params()
 
     elif isinstance(layer, nn.ReLU) or isinstance(layer,nn.ReLU6):
-        flops = get_relu_Params()
+        params = get_relu_Params()
 
     elif isinstance(layer, nn.Flatten):
-        flops = get_flatten_Params()
+        params = get_flatten_Params()
 
     elif isinstance(layer, nn.AdaptiveAvgPool2d):
-        flops = get_adaptive_avg_pool2d_Params(layer,x)
+        params = get_adaptive_avg_pool2d_Params(layer,x)
 
     elif isinstance(layer, a3_GoogLeNet.BasicConv2d):
-        flops = get_BasicConv2d_Params(layer,x)
+        params = get_BasicConv2d_Params(layer,x)
 
     elif isinstance(layer, a3_GoogLeNet.Inception):
-        flops = get_Inception_Params(layer,x)
+        params = get_Inception_Params(layer,x)
 
     elif isinstance(layer,a4_ResNet.BasicBlock):
-        flops = get_BasicBlock_Params(layer,x)
+        params = get_BasicBlock_Params(layer,x)
+
+    elif isinstance(layer,a5_MobileNet.ConvNormActivation):
+        params = get_ConvNormActivation_Params(layer,x)
+
+    elif isinstance(layer,a5_MobileNet.InvertedResidual):
+        params = get_InvertedResidual_Params(layer,x)
 
     else:
-        flops = 0
+        params = 0
         raise InterruptedError
-    return flops
+    return params
 
 
 def get_linear_FLOPs(linear_layer):
@@ -209,9 +245,9 @@ def get_conv2d_Params(conv2d_layer,x):
 def get_depthwise_separable_conv2d_FLOPs(conv2d_layer,x):
     in_channel = conv2d_layer.in_channels
     out_channel = conv2d_layer.out_channels
-    kernel_size = conv2d_layer.kernel_size
+    kernel_size = conv2d_layer.kernel_size[0]
     input_map = x.shape[2]
-    output_map = (input_map - conv2d_layer.kernel_size + conv2d_layer.padding + conv2d_layer.stride) / conv2d_layer.stride
+    output_map = (input_map - conv2d_layer.kernel_size[0] + conv2d_layer.padding[0] + conv2d_layer.stride[0]) / conv2d_layer.stride[0]
 
     depthwise_macc = kernel_size * kernel_size * in_channel * output_map * output_map
     pointwise_macc = output_map * output_map * in_channel * out_channel
@@ -222,7 +258,7 @@ def get_depthwise_separable_conv2d_FLOPs(conv2d_layer,x):
 def get_depthwise_separable_conv2d_Params(conv2d_layer,x):
     in_channel = conv2d_layer.in_channels
     out_channel = conv2d_layer.out_channels
-    kernel_size = conv2d_layer.kernel_size
+    kernel_size = conv2d_layer.kernel_size[0]
 
     depthwise_params = kernel_size * kernel_size * in_channel
     pointwise_params = 1 * 1 * in_channel * out_channel + out_channel
@@ -233,9 +269,9 @@ def get_depthwise_separable_conv2d_Params(conv2d_layer,x):
 def get_expansion_block_FLOPs(conv2d_layer,x,Cexp):
     in_channel = conv2d_layer.in_channels
     out_channel = conv2d_layer.out_channels
-    kernel_size = conv2d_layer.kernel_size
+    kernel_size = conv2d_layer.kernel_size[0]
     input_map = x.shape[2]
-    output_map = (input_map - conv2d_layer.kernel_size + conv2d_layer.padding + conv2d_layer.stride) / conv2d_layer.stride
+    output_map = (input_map - conv2d_layer.kernel_size[0] + conv2d_layer.padding[0] + conv2d_layer.stride[0]) / conv2d_layer.stride[0]
 
     expansion_layer = in_channel * input_map  * input_map  * Cexp
     depthwise_layer = kernel_size * kernel_size * Cexp * output_map * output_map
@@ -322,3 +358,34 @@ def get_BasicBlock_Params(block,x):
         return get_model_Params(child_model1, x) + get_model_Params(downsample, x)
     else:
         return get_model_Params(child_model1, x)
+
+
+
+def get_ConvNormActivation_FLOPs(block,x):
+    return get_model_FLOPs(block,x)
+
+
+
+def get_ConvNormActivation_Params(block, x):
+    return get_model_Params(block,x)
+
+
+def get_InvertedResidual_FLOPs(block,x):
+    block = block.conv
+    flops = 0.0
+    for layer in block:
+        flops += get_model_FLOPs(layer,x)
+        x = layer(x)
+    return flops
+
+
+def get_InvertedResidual_Params(block,x):
+    block = block.conv
+    params = 0.0
+    for layer in block:
+        params += get_model_Params(layer,x)
+        x = layer(x)
+    return params
+
+
+

@@ -249,7 +249,7 @@ def test_model(save_flag = False):
     params = []
     times = []
     for i in range(1,2):
-        for i in range(4, 5):
+        for i in range(5, 6):
             model = function.getDnnModel(i)
             model = model.to(device)
 
@@ -280,7 +280,7 @@ def test_model(save_flag = False):
 
 
 if __name__ == '__main__':
-    save_flag = True
+    save_flag = False
 
     """ 获取数据 """
     # get_predict_data(save_flag)
@@ -293,6 +293,7 @@ if __name__ == '__main__':
 
 
     test_model(False)
+
 
 
 
