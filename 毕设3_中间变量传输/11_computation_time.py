@@ -61,10 +61,44 @@ def show_FLOPs_features(model,x,epoch=300,save_flag=False,Path=None,sheetname=No
 
 
 
+def show_FLOPs_features2(model,x,epoch=300,save_flag=False,Path=None,sheetname=None):
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+    model_len = len(model)
+
+    index = 1
+    for i in range(model_len):
+        layer = model[i]
+        if isinstance(layer, nn.ReLU) or isinstance(layer, nn.BatchNorm2d) or isinstance(layer, nn.Dropout):
+            continue
+
+        edge_model,_ = function.model_partition(model,i+1)
+
+        if device == "cuda":
+            _, myTime = function.recordTimeGpu(edge_model, x, device, epoch)
+        elif device == "cpu":
+            _, myTime = function.recordTimeCpu(edge_model, x, device, epoch)
+        else:
+            myTime = 0.0
+
+        flops = model_features.get_model_FLOPs(edge_model, x)
+        params = model_features.get_model_Params(edge_model, x)
+
+        print(f"{index} - {layer}   computation number : {flops} \t params : {params} \t layer computation time : {myTime:.3f}")
+
+        if save_flag:
+            value = [[flops,params,round(flops/10000,3),round(params/10000,3),myTime]]
+            function.write_excel_xls_append(Path, sheetname, value)
+        print(f"flops: {flops}  \t  params: {params}  \t  computation time: {myTime:.3f} (ms)")
+        print("=============================================================")
+
+        index += 1
+
+
+
 def get_predict_data(save_flag = False):
     save_flag = save_flag
     path = "../res/computation_time.xls"
-    sheet_name = "mac_one"
+    sheet_name = "cuda"
     value = [["flops", "params","flops2","params2","times",]]
     if save_flag:
         function.create_excel_xsl(path, sheet_name, value)
@@ -73,9 +107,8 @@ def get_predict_data(save_flag = False):
     flops = []
     params = []
     times = []
-    for i in range(1):
+    for i in range(1,3):
         for i in range(1, 3):
-        # for i in range(2, 3):
             model = function.getDnnModel(i)
             model = model.to(device)
 
@@ -88,13 +121,20 @@ def get_predict_data(save_flag = False):
                 function.warmUpCpu(model,x,device)
 
             # function.show_features_gpu(alexnet,x)
-            my_flops, my_params, my_times = show_FLOPs_features(model,x,save_flag=save_flag,Path=path,sheetname=sheet_name)
-            flops.extend(my_flops)
-            params.extend(my_params)
-            times.extend(my_times)
+
+            """
+                细粒度分层模式
+            """
+            # my_flops, my_params, my_times = show_FLOPs_features(model,x,save_flag=save_flag,Path=path,sheetname=sheet_name)
+            # flops.extend(my_flops)
+            # params.extend(my_params)
+            # times.extend(my_times)
 
 
-
+            """
+                粗粒度分层模式
+            """
+            show_FLOPs_features2(model,x,save_flag=save_flag,Path=path,sheetname=sheet_name)
 
 
 
@@ -120,7 +160,7 @@ def get_predict_model():
     # functionImg.getScatterImg(flops,times,"flops","times(ms)")
     functionImg.getScatterImg(flops2,times,"FLOPs","Latency(ms)")
     # functionImg.getScatterImg(params,times,"params","times(ms)")
-    functionImg.getScatterImg(params2,times,"Params","Latency(ms)")
+    # functionImg.getScatterImg(params2,times,"Params","Latency(ms)")
 
     save = False
     # functionImg.myPolynomialRegression_single(flops2,times,"flops","times(ms)",degree=2,save=save,
@@ -196,16 +236,63 @@ def compare_alexnet():
 
 
 
+def test_model(save_flag = False):
+    save_flag = save_flag
+    path = "../res/computation_time.xls"
+    sheet_name = "cuda"
+    value = [["flops", "params","flops2","params2","times",]]
+    if save_flag:
+        function.create_excel_xsl(path, sheet_name, value)
+
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+    flops = []
+    params = []
+    times = []
+    for i in range(1,2):
+        for i in range(3, 4):
+            model = function.getDnnModel(i)
+            model = model.to(device)
+
+            x = torch.rand(size=(1, 3, 224, 224))
+            x = x.to(device)
+
+            if device == "cuda":
+                function.warmUpGpu(model, x, device)
+            if device == "cpu":
+                function.warmUpCpu(model,x,device)
+
+            # function.show_features_gpu(alexnet,x)
+
+            """
+                细粒度分层模式
+            """
+            # my_flops, my_params, my_times = show_FLOPs_features(model,x,save_flag=save_flag,Path=path,sheetname=sheet_name)
+            # flops.extend(my_flops)
+            # params.extend(my_params)
+            # times.extend(my_times)
+
+
+            """
+                粗粒度分层模式
+            """
+            show_FLOPs_features2(model,x,save_flag=save_flag,Path=path,sheetname=sheet_name)
+
 
 
 if __name__ == '__main__':
-    save_flag = False
+    save_flag = True
+
+    """ 获取数据 """
     # get_predict_data(save_flag)
 
-    get_predict_model()
+    """ 构建模型 """
+    # get_predict_model()
 
+    """ 数据比较 """
     # compare_alexnet()
 
+
+    test_model(False)
 
 
 

@@ -270,7 +270,9 @@ class Inception(nn.Module):
         super().__init__()
         if conv_block is None:
             conv_block = BasicConv2d
-        self.branch1 = conv_block(in_channels, ch1x1, kernel_size=1)
+        self.branch1 = nn.Sequential(
+            conv_block(in_channels, ch1x1, kernel_size=1)
+        )
 
         self.branch2 = nn.Sequential(
             conv_block(in_channels, ch3x3red, kernel_size=1),

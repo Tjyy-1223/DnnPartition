@@ -1,4 +1,34 @@
 import torch.nn as nn
+import a3_GoogLeNet
+
+def get_model_FLOPs(model,x):
+    flops = 0.0
+    for i in range(len(model)):
+        layer = model[i]
+
+        if isinstance(layer, nn.ReLU) or isinstance(layer, nn.BatchNorm2d) or isinstance(layer, nn.Dropout):
+            x = layer(x)
+            continue
+
+        flops += get_layer_FLOPs(layer,x)
+        x = layer(x)
+    return flops
+
+
+def get_model_Params(model,x):
+    params = 0.0
+    for i in range(len(model)):
+        layer = model[i]
+
+        if isinstance(layer, nn.ReLU) or isinstance(layer, nn.BatchNorm2d) or isinstance(layer, nn.Dropout):
+            x = layer(x)
+            continue
+
+        params += get_layer_Params(layer,x)
+        x = layer(x)
+    return params
+
+
 
 
 def get_layer_FLOPs(layer,x):
@@ -23,8 +53,15 @@ def get_layer_FLOPs(layer,x):
     elif isinstance(layer, nn.AdaptiveAvgPool2d):
         flops = get_adaptive_avg_pool2d_FLOPs(layer,x)
 
+    elif isinstance(layer, a3_GoogLeNet.BasicConv2d):
+        flops = get_BasicConv2d_FLOPs(layer,x)
+
+    elif isinstance(layer, a3_GoogLeNet.Inception):
+        flops = get_Inception_FLOPs(layer,x)
+
     else:
         flops = 0
+        raise InterruptedError
     return flops
 
 
@@ -50,9 +87,17 @@ def get_layer_Params(layer,x):
     elif isinstance(layer, nn.AdaptiveAvgPool2d):
         flops = get_adaptive_avg_pool2d_Params(layer,x)
 
+    elif isinstance(layer, a3_GoogLeNet.BasicConv2d):
+        flops = get_BasicConv2d_Params(layer,x)
+
+    elif isinstance(layer, a3_GoogLeNet.Inception):
+        flops = get_Inception_Params(layer,x)
+
     else:
         flops = 0
+        raise InterruptedError
     return flops
+
 
 def get_linear_FLOPs(linear_layer):
     input_size = linear_layer.in_features
@@ -189,3 +234,43 @@ def get_expansion_block_FLOPs(conv2d_layer,x,Cexp):
     projection_layer = Cexp * output_map * output_map * out_channel
     flops = 2 * (expansion_layer + depthwise_layer + projection_layer)
     return flops
+
+
+def get_BasicConv2d_FLOPs(layer, x):
+    conv = layer.conv
+    conv_flops = get_conv2d_FLOPs(conv,x)
+    x = conv(x)
+
+    return conv_flops
+
+
+
+def get_BasicConv2d_Params(layer, x):
+    conv = layer.conv
+    conv_params = get_conv2d_Params(conv,x)
+    x = conv(x)
+
+    return conv_params
+
+
+
+def get_Inception_FLOPs(block,x):
+    branch1 = block.branch1
+    branch2 = block.branch2
+    branch3 = block.branch3
+    branch4 = block.branch4
+    return get_model_FLOPs(branch1, x) \
+           + get_model_FLOPs(branch2, x) \
+           + get_model_FLOPs(branch3, x) \
+           + get_model_FLOPs(branch4, x)
+
+
+def get_Inception_Params(block,x):
+    branch1 = block.branch1
+    branch2 = block.branch2
+    branch3 = block.branch3
+    branch4 = block.branch4
+    return get_model_Params(branch1, x) \
+           + get_model_Params(branch2, x) \
+           + get_model_Params(branch3, x) \
+           + get_model_Params(branch4, x)
