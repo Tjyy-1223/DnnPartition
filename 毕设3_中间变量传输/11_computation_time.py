@@ -61,8 +61,8 @@ def show_FLOPs_features(model,x,epoch=300,save_flag=False,Path=None,sheetname=No
 
 
 
-def show_FLOPs_features2(model,x,epoch=300,save_flag=False,Path=None,sheetname=None):
-    device = "cuda" if torch.cuda.is_available() else "cpu"
+def show_FLOPs_features2(model,x,epoch=300,device ="cpu",save_flag=False,Path=None,sheetname=None):
+    device = device
     model_len = len(model)
 
     index = 1
@@ -104,6 +104,7 @@ def get_predict_data(save_flag = False):
         function.create_excel_xsl(path, sheet_name, value)
 
     device = "cuda" if torch.cuda.is_available() else "cpu"
+    print(device)
     flops = []
     params = []
     times = []
@@ -245,11 +246,13 @@ def test_model(save_flag = False):
         function.create_excel_xsl(path, sheet_name, value)
 
     device = "cuda" if torch.cuda.is_available() else "cpu"
+    # device = "cpu"
+
     flops = []
     params = []
     times = []
     for i in range(1,2):
-        for i in range(5, 6):
+        for i in range(1,2):
             model = function.getDnnModel(i)
             model = model.to(device)
 
@@ -263,6 +266,13 @@ def test_model(save_flag = False):
 
             # function.show_features_gpu(alexnet,x)
 
+            if device == "cuda":
+                _,nowtime = function.recordTimeGpu(model,x,device,300)
+            if device == "cpu":
+                _,nowtime = function.recordTimeCpu(model,x,device,300)
+
+            print("what the fuck !",nowtime)
+
             """
                 细粒度分层模式
             """
@@ -275,7 +285,7 @@ def test_model(save_flag = False):
             """
                 粗粒度分层模式
             """
-            show_FLOPs_features2(model,x,save_flag=save_flag,Path=path,sheetname=sheet_name)
+            show_FLOPs_features2(model,x,save_flag=save_flag,device=device,Path=path,sheetname=sheet_name)
 
 
 
@@ -293,6 +303,8 @@ if __name__ == '__main__':
 
 
     test_model(False)
+
+
 
 
 

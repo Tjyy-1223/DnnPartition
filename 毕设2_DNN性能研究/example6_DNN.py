@@ -38,7 +38,7 @@ if __name__ == '__main__':
     x = x.to(device)
     print(f"x device : {x.device}")
 
-    modelIndex = 4
+    modelIndex = 1
     model_names = ["alexnet","vgg16","googLeNet","resnet18","mobileNetv2"]
     model_name = model_names[modelIndex-1]
     model = getDnnModel(modelIndex)
