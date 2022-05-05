@@ -170,8 +170,8 @@ def myPolynomialRegression(x, y,labelx,labely,devide_n=1,save = False,modelPath 
     """
     s = 50
 
-    X2 = myTransform(x, degree=2)
-    # X2 = x
+    # X2 = myTransform(x, degree=2)
+    X2 = x
     lin_reg = LinearRegression()
     lin_reg.fit(X2, y)
 
@@ -189,10 +189,12 @@ def myPolynomialRegression(x, y,labelx,labely,devide_n=1,save = False,modelPath 
     截距参数:  6.9646173709356844
     """
     fig = plt.figure(figsize=(8, 5))
-    plt.scatter(x, y, s, c="g", alpha=0.5)
-    plt.scatter(x, y_predict)
-    # plt.scatter(y, y_predict)
-    plt.plot(np.sort(x), y_predict[np.argsort(x)], color='r')
+    # plt.scatter(x, y, s, c="g", alpha=0.5)
+    # plt.scatter(x, y_predict)
+    # plt.plot(np.sort(x), y_predict[np.argsort(x)], color='r')
+
+    plt.scatter(y, y_predict)
+
 
 
     plt.ticklabel_format(style='sci', axis='x', scilimits=(0, 0), useMathText=True)
@@ -201,10 +203,10 @@ def myPolynomialRegression(x, y,labelx,labely,devide_n=1,save = False,modelPath 
     # 设置坐标轴范围
     # n = devide_n
     # y_n = devide_n
-    max_X = np.max(x)
-    max_Y = np.max(y)
-    plt.xlim((0, max_X))
-    plt.ylim((0, max_Y))
+    # max_X = np.max(x)
+    # max_Y = np.max(y)
+    # plt.xlim((0, max_X))
+    # plt.ylim((0, max_Y))
 
     plt.xlabel(labelx)
     plt.ylabel(labely)
