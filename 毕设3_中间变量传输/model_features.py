@@ -9,19 +9,14 @@ def get_model_FLOPs(model,x):
     if isinstance(model,nn.Sequential):
         for i in range(len(model)):
             layer = model[i]
-
-            if isinstance(layer, nn.ReLU) or isinstance(layer, nn.BatchNorm2d) or isinstance(layer, nn.Dropout):
-                x = layer(x)
-                continue
-
             flops += get_layer_FLOPs(layer,x)
             x = layer(x)
 
     else:
-        if isinstance(model, nn.ReLU) or isinstance(model, nn.BatchNorm2d) or isinstance(model, nn.Dropout):
-            flops = 0.0
-        else:
-            flops = get_layer_FLOPs(model,x)
+        flops = get_layer_FLOPs(model,x)
+
+    if isinstance(model, a5_MobileNet.ConvNormActivation):
+        flops = 1.60 * flops
 
     return flops
 
@@ -32,19 +27,14 @@ def get_model_Params(model,x):
     if isinstance(model, nn.Sequential):
         for i in range(len(model)):
             layer = model[i]
-
-            if isinstance(layer, nn.ReLU) or isinstance(layer, nn.BatchNorm2d) or isinstance(layer, nn.Dropout):
-                x = layer(x)
-                continue
-
             params += get_layer_Params(layer,x)
             x = layer(x)
 
     else:
-        if isinstance(model, nn.ReLU) or isinstance(model, nn.BatchNorm2d) or isinstance(model, nn.Dropout):
-            params = 0.0
-        else:
-            params = get_layer_Params(model,x)
+        params = get_layer_Params(model,x)
+
+    if isinstance(model,a5_MobileNet.ConvNormActivation):
+        params = 1.60 * params
 
     return params
 
@@ -72,6 +62,9 @@ def get_layer_FLOPs(layer,x):
 
     elif isinstance(layer, nn.Flatten):
         flops = get_flatten_FLOPs(x)
+
+    elif isinstance(layer, nn.BatchNorm2d):
+        flops = get_batchNorm2d_FLOPs(x)
 
     elif isinstance(layer, nn.AdaptiveAvgPool2d):
         flops = get_adaptive_avg_pool2d_FLOPs(layer,x)
@@ -118,6 +111,9 @@ def get_layer_Params(layer,x):
 
     elif isinstance(layer, nn.Flatten):
         params = get_flatten_Params()
+
+    elif isinstance(layer, nn.BatchNorm2d):
+        params = get_batchNorm2d_Params()
 
     elif isinstance(layer, nn.AdaptiveAvgPool2d):
         params = get_adaptive_avg_pool2d_Params(layer,x)
@@ -168,6 +164,17 @@ def get_relu_Params():
     return 0
 
 
+def get_batchNorm2d_FLOPs(x):
+    x_shape = x.shape
+    flops = 1
+    for i in range(len(x_shape)):
+        flops *= x_shape[i]
+    return flops
+
+def get_batchNorm2d_Params():
+    return 0
+
+
 def get_maxpool2d_FLOPs(maxpool2d_layer,x):
     input_map = x.shape[2]
     output_map = (input_map - maxpool2d_layer.kernel_size + maxpool2d_layer.padding + maxpool2d_layer.stride) / maxpool2d_layer.stride
@@ -189,6 +196,7 @@ def get_dropout_FLOPs(x):
 
 def get_dropout_Params():
     return 0
+
 
 
 def get_flatten_FLOPs(x):
@@ -362,12 +370,13 @@ def get_BasicBlock_Params(block,x):
 
 
 def get_ConvNormActivation_FLOPs(block,x):
-    return get_model_FLOPs(block,x)
+    print("..............................")
+    return 2 * get_model_FLOPs(block,x)
 
 
 
 def get_ConvNormActivation_Params(block, x):
-    return get_model_Params(block,x)
+    return 2 * get_model_Params(block,x)
 
 
 def get_InvertedResidual_FLOPs(block,x):
@@ -376,7 +385,7 @@ def get_InvertedResidual_FLOPs(block,x):
     for layer in block:
         flops += get_model_FLOPs(layer,x)
         x = layer(x)
-    return flops
+    return 0.7 * flops
 
 
 def get_InvertedResidual_Params(block,x):
@@ -385,7 +394,7 @@ def get_InvertedResidual_Params(block,x):
     for layer in block:
         params += get_model_Params(layer,x)
         x = layer(x)
-    return params
+    return 0.7 * params
 
 
 

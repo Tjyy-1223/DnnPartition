@@ -324,7 +324,7 @@ def get_excel_data(path,sheet_name,col_name):
 """
     GPU预热操作
 """
-def warmUpGpu(model,x,device):
+def warmUpGpu(model,x,device = "cuda"):
     # GPU warm-up and prevent it from going into power-saving mode
     dummy_input = torch.rand(x.shape).to(device)
 
@@ -379,7 +379,7 @@ def warmUpCpu(model,x,device):
 """
     记录GPU的用时
 """
-def recordTimeGpu(model, x, device, epoch):
+def recordTimeGpu(model, x, device = "cuda", epoch = 300):
     model = model.to(device)
     all_time = 0.0
     for i in range(epoch):
