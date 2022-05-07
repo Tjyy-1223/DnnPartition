@@ -44,7 +44,7 @@ def show_FLOPs_features(model,x,epoch=300,save_flag=False,Path=None,sheetname=No
         flops_sum += flops
         params_sum += params
 
-        print( f"{index} - {layer}   computation number : {flops} \t params : {params} \t layer computation time : {myTime:.3f}")
+        print( f"{index} - {layer}   computation number : {flops/10000} \t params : {params} \t layer computation time : {myTime:.3f}")
 
         flops_list.append(flops_sum)
         params_list.append(params_sum)
@@ -60,9 +60,10 @@ def show_FLOPs_features(model,x,epoch=300,save_flag=False,Path=None,sheetname=No
 
 
 
-def show_FLOPs_features2(model,x,epoch=300,device ="cpu",save_flag=False,Path=None,sheetname=None):
+def show_FLOPs_features2(model,x,epoch=300,device ="cpu",save_flag=False,Path=None,sheetname=None,index = 0):
     device = device
     model_len = len(model)
+
 
     index = 1
     for i in range(model_len):
@@ -72,6 +73,8 @@ def show_FLOPs_features2(model,x,epoch=300,device ="cpu",save_flag=False,Path=No
 
         edge_model,_ = function.model_partition(model,i+1)
 
+        print(edge_model)
+        print(x.shape)
         if device == "cuda":
             _, myTime = function.recordTimeGpu(edge_model, x, device, epoch)
         elif device == "cpu":
@@ -85,7 +88,7 @@ def show_FLOPs_features2(model,x,epoch=300,device ="cpu",save_flag=False,Path=No
         print(f"{index} - {layer}   computation number : {flops} \t params : {params} \t layer computation time : {myTime:.3f}")
 
         if save_flag:
-            value = [[flops,params,round(flops/10000,3),round(params/10000,3),myTime]]
+            value = [[index,flops,params,round(flops/10000,3),round(params/10000,3),myTime]]
             function.write_excel_xls_append(Path, sheetname, value)
         print(f"flops: {flops}  \t  params: {params}  \t  computation time: {myTime:.3f} (ms)")
         print("=============================================================")
@@ -97,8 +100,8 @@ def show_FLOPs_features2(model,x,epoch=300,device ="cpu",save_flag=False,Path=No
 def get_predict_data(save_flag = False):
     save_flag = save_flag
     path = "../res/computation_time.xls"
-    sheet_name = "cuda_all"
-    value = [["flops", "params","flops2","params2","times",]]
+    sheet_name = "cuda_all2"
+    value = [["index","flops", "params","flops2","params2","times",]]
     if save_flag:
         function.create_excel_xsl(path, sheet_name, value)
 
@@ -107,9 +110,9 @@ def get_predict_data(save_flag = False):
     flops = []
     params = []
     times = []
-    for i in range(1,3):
-        for i in range(1,6):
-            model = function.getDnnModel(i)
+    for k in range(1,2):
+        for model_inedx in range(1,7):
+            model = function.getDnnModel(model_inedx)
             model = model.to(device)
 
             x = torch.rand(size=(1, 3, 224, 224))
@@ -134,7 +137,33 @@ def get_predict_data(save_flag = False):
             """
                 粗粒度分层模式
             """
-            show_FLOPs_features2(model,x,save_flag=save_flag,device=device,Path=path,sheetname=sheet_name)
+            for i in range(len(model)):
+                x = torch.rand(size=(1, 3, 224, 224))
+                x = x.to(device)
+
+                layer_list = []
+
+                layer = model[i]
+                if isinstance(layer, nn.ReLU) or isinstance(layer, nn.BatchNorm2d) or isinstance(layer, nn.Dropout):
+                    continue
+
+                for j in range(len(model)):
+                    layer = model[j]
+
+                    if j < i:
+                        x = layer(x)
+                        print(layer, "    ", x.shape)
+                        continue
+
+                    else:
+                        layer_list.append(layer)
+
+                temp_model = nn.Sequential(*layer_list)
+                print("====================================================================================")
+                print(temp_model)
+                print("====================================================================================")
+                show_FLOPs_features2(temp_model,x,save_flag=save_flag,device=device,Path=path,sheetname=sheet_name,index = j)
+
 
 
 
@@ -143,7 +172,7 @@ def get_predict_model():
     mm = MinMaxScaler()
     path = "../res/computation_time.xls"
     # sheet_name = "mac_one"
-    sheet_name = "cuda_all"
+    sheet_name = "cuda_all2"
 
     flops = function.get_excel_data(path,sheet_name,"flops")
     flops2 = function.get_excel_data(path,sheet_name,"flops2")
@@ -158,19 +187,23 @@ def get_predict_model():
     times = np.array(times)
 
     # functionImg.getScatterImg(flops,times,"flops","times(ms)")
-    functionImg.getScatterImg(flops2,times,"FLOPs","Latency(ms)")
+    # functionImg.getScatterImg(flops2,times,"FLOPs","Latency(ms)")
     # functionImg.getScatterImg(params,times,"params","times(ms)")
-    functionImg.getScatterImg(params2,times,"Params","Latency(ms)")
+    # functionImg.getScatterImg(params2,times,"Params","Latency(ms)")
 
     save = False
+    # functionImg.myPolynomialRegression_single(flops2, times, "flops", "times(ms)", degree=1)
+    # functionImg.myPolynomialRegression_single(flops2, times, "flops", "times(ms)", degree=2)
     # functionImg.myPolynomialRegression_single(flops2,times,"flops","times(ms)",degree=3)
+    # functionImg.myPolynomialRegression_single(flops2,times,"flops","times(ms)",degree=4)
+    # functionImg.myPolynomialRegression_single(flops2,times,"flops","times(ms)",degree=5)
 
-    # functionImg.myPolynomialRegression_single(flops2, times, "flops", "times(ms)", degree=2, save=save,
-    #                                           modelPath="../model/flops_all_time_cuda.m")
+    functionImg.myPolynomialRegression_single(flops2, times, "flops", "times(ms)", degree=3, save=save,
+                                              modelPath="../model/flops_all_time_cuda.m")
     # #
-    # ones = torch.ones(len(flops2))
-    # x = np.c_[ones,flops2,params2]
-    # functionImg.myPolynomialRegression(x,times,"y_real","y_predict",save=save,modelPath="../model/flops_params_all_time_cuda.m")
+    ones = torch.ones(len(flops2))
+    x = np.c_[ones,flops2,params2]
+    functionImg.myPolynomialRegression(x,times,"y_real","y_predict",save=save,modelPath="../model/flops_params_all_time_cuda.m")
 
 
 
@@ -251,7 +284,7 @@ def test_model(save_flag = False):
     params = []
     times = []
     for i in range(1,2):
-        for i in range(3,4):
+        for i in (2,3):
             model = function.getDnnModel(i)
             model = model.to(device)
 
@@ -270,12 +303,12 @@ def test_model(save_flag = False):
             if device == "cpu":
                 _,nowtime = function.recordTimeCpu(model,x,device,300)
 
-            print("what the fuck !",nowtime)
+            # print("what the fuck !",nowtime)
 
             """
                 细粒度分层模式
             """
-            # my_flops, my_params, my_times = show_FLOPs_features(model,x,save_flag=save_flag,Path=path,sheetname=sheet_name)
+            my_flops, my_params, my_times = show_FLOPs_features(model,x,save_flag=save_flag,Path=path,sheetname=sheet_name)
             # flops.extend(my_flops)
             # params.extend(my_params)
             # times.extend(my_times)
@@ -284,12 +317,12 @@ def test_model(save_flag = False):
             """
                 粗粒度分层模式
             """
-            show_FLOPs_features2(model,x,save_flag=save_flag,device=device,Path=path,sheetname=sheet_name)
+            # show_FLOPs_features2(model,x,save_flag=save_flag,device=device,Path=path,sheetname=sheet_name)
 
 
 
 if __name__ == '__main__':
-    save_flag = True
+    # save_flag = False
 
 
     """ 获取数据 """

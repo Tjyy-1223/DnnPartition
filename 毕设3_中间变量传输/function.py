@@ -11,6 +11,7 @@ import a2_vggNet
 import a3_GoogLeNet
 import a4_ResNet
 import a5_MobileNet
+import a6_LeNet
 
 
 """
@@ -442,6 +443,9 @@ def getDnnModel(index):
     elif index == 5:
         mobileNet = a5_MobileNet.mobilenet_v2()
         return mobileNet
+    elif index == 6:
+        LeNet = a6_LeNet.LeNet()
+        return LeNet
     else:
         print("no model")
         return None

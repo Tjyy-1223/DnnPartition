@@ -234,7 +234,7 @@ def get_conv2d_FLOPs(conv2d_layer,x):
     padding = conv2d_layer.padding[0]
     stride = conv2d_layer.stride[0]
     input_map = x.shape[2]
-    output_map = (input_map - kernel_size + padding + stride) / stride
+    output_map = (input_map - kernel_size + 2 * padding + stride) // stride
 
     macc = kernel_size * kernel_size * in_channel * out_channel * output_map * output_map
     flops = 2 * macc
@@ -289,6 +289,7 @@ def get_expansion_block_FLOPs(conv2d_layer,x,Cexp):
 
 
 def get_BasicConv2d_FLOPs(layer, x):
+    # print(x.shape)
     conv = layer.conv
     conv_flops = get_conv2d_FLOPs(conv,x)
     x = conv(x)
@@ -311,10 +312,11 @@ def get_Inception_FLOPs(block,x):
     branch2 = block.branch2
     branch3 = block.branch3
     branch4 = block.branch4
-    return get_model_FLOPs(branch1, x) \
+    flops =  get_model_FLOPs(branch1, x) \
            + get_model_FLOPs(branch2, x) \
            + get_model_FLOPs(branch3, x) \
            + get_model_FLOPs(branch4, x)
+    return 2 * flops
 
 
 def get_Inception_Params(block,x):
@@ -322,10 +324,7 @@ def get_Inception_Params(block,x):
     branch2 = block.branch2
     branch3 = block.branch3
     branch4 = block.branch4
-    return get_model_Params(branch1, x) \
-           + get_model_Params(branch2, x) \
-           + get_model_Params(branch3, x) \
-           + get_model_Params(branch4, x)
+    return 2*(get_model_Params(branch1, x)+ get_model_Params(branch2, x) + get_model_Params(branch3, x) + get_model_Params(branch4, x))
 
 
 
@@ -343,9 +342,9 @@ def get_BasicBlock_FLOPs(block,x):
     downsample = block.downsample
 
     if downsample is not None:
-        return get_model_FLOPs(child_model1,x) + get_model_FLOPs(downsample,x)
+        return 1.25 * (get_model_FLOPs(child_model1,x) + get_model_FLOPs(downsample,x))
     else:
-        return get_model_FLOPs(child_model1,x)
+        return 1.25 * (get_model_FLOPs(child_model1,x))
 
 
 
@@ -370,13 +369,12 @@ def get_BasicBlock_Params(block,x):
 
 
 def get_ConvNormActivation_FLOPs(block,x):
-    print("..............................")
-    return 2 * get_model_FLOPs(block,x)
+    return get_model_FLOPs(block,x)
 
 
 
 def get_ConvNormActivation_Params(block, x):
-    return 2 * get_model_Params(block,x)
+    return get_model_Params(block,x)
 
 
 def get_InvertedResidual_FLOPs(block,x):

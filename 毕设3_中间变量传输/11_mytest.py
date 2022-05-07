@@ -287,4 +287,56 @@ if __name__ == '__main__':
 
     # test_Inception()
 
-    test_BasicBlock()
+    # test_BasicBlock()
+    device = "cuda"
+
+    x = torch.rand(size=(1,512,28,28))
+    x = x.to(device)
+    myc = nn.Conv2d(512, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    myc = myc.to(device)
+
+    function.warmUpGpu(myc,x)
+
+    _, time1 = function.recordTimeGpu(myc, x)
+    print(time1)
+    print(model_features.get_model_FLOPs(myc,x))
+
+    print("============================================================")
+
+    x = torch.rand(size=(1, 256, 28, 28))
+    x = x.to(device)
+    Inception = a4_ResNet.BasicBlock(256,256)
+    Inception = Inception.to(device)
+
+    _, time1 = function.recordTimeGpu(Inception, x)
+    print(Inception)
+    print(time1)
+    print(model_features.get_model_FLOPs(Inception, x))
+
+    print("============================================================")
+
+    x = torch.rand(size=(1, 256, 28, 28))
+    x = x.to(device)
+
+    model = nn.Sequential(
+        nn.Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False),
+        nn.BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True),
+        nn.ReLU(inplace=True),
+        nn.Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False),
+        nn.BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True),
+    )
+    model = model.to(device)
+
+    _, time1 = function.recordTimeGpu(model, x)
+    print(model)
+    print(time1)
+    print(model_features.get_model_FLOPs(model, x))
+
+    print("============================================================")
+
+    for layer in model:
+        _, time1 = function.recordTimeGpu(layer, x)
+        print(layer)
+        print(time1)
+        print(model_features.get_model_FLOPs(layer, x))
+        x = layer(x)

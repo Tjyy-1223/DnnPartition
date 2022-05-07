@@ -5,7 +5,7 @@ import a2_vggNet
 import a3_GoogLeNet
 import a4_ResNet
 import a5_MobileNet
-
+import a6_LeNet
 
 def getDnnModel(index):
     if index == 1:
@@ -23,6 +23,9 @@ def getDnnModel(index):
     elif index == 5:
         mobileNet = a5_MobileNet.mobilenet_v2()
         return mobileNet
+    elif index == 6:
+        LeNet = a6_LeNet.LeNet()
+        return LeNet
     else:
         print("no model")
         return None
@@ -38,8 +41,8 @@ if __name__ == '__main__':
     x = x.to(device)
     print(f"x device : {x.device}")
 
-    modelIndex = 1
-    model_names = ["alexnet","vgg16","googLeNet","resnet18","mobileNetv2"]
+    modelIndex = 6
+    model_names = ["alexnet","vgg16","googLeNet","resnet18","mobileNetv2","LeNet"]
     model_name = model_names[modelIndex-1]
     model = getDnnModel(modelIndex)
     model.to(device)
@@ -48,7 +51,7 @@ if __name__ == '__main__':
     temp_x = x
     epoch = 300
     save_flag = False
-    filter = False
+    filter = True
     path = "../res/DnnLayer_mac_power_all.xls"
     if device == "cpu":
         x = function.show_features_cpu(model, x, filter=filter ,epoch=epoch,save=save_flag,model_name=model_name,path=path)

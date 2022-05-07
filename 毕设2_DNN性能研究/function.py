@@ -5,13 +5,13 @@ import threading
 import xlrd
 import xlwt
 from xlutils.copy import copy
-import pickle
 
 import a1_alexNet
 import a2_vggNet
 import a3_GoogLeNet
 import a4_ResNet
 import a5_MobileNet
+import a6_LeNet
 
 
 """
@@ -52,7 +52,7 @@ def model_partition(alexnet, index):
     最后返回运行结果x
     修改：省略了 激活层 batchnormal层 以及 dropout层
 """
-def show_features_gpu(alexnet, x ,filter = True,epoch = 3,save = False,model_name = "model",path = None):
+def show_features_gpu(alexnet, x ,filter = True,epoch = 300,save = False,model_name = "model",path = None):
 
     device = "cuda" if torch.cuda.is_available() else "cpu"
 
@@ -81,7 +81,7 @@ def show_features_gpu(alexnet, x ,filter = True,epoch = 3,save = False,model_nam
 
     if save:
         sheet_name = model_name
-        value = [["index", "layerName","computation_time(ms)","output_shape","params","size","transport_num","transport_size(MB)"]]
+        value = [["index", "layerName","computation_time(ms)","output_shape","transport_num","transport_size(MB)"]]
         create_excel_xsl(path,sheet_name,value)
 
     if len(alexnet) > 0:
@@ -120,12 +120,7 @@ def show_features_gpu(alexnet, x ,filter = True,epoch = 3,save = False,model_nam
 
             if save:
                 sheet_name = model_name
-                # value = [
-                #     ["index", "layerName", "computation_time(ms)", "output_shape", "params",
-                #      "size", "transport_num","transport_size(MB)"]]
-                pytorch_total_params = sum(p.numel() for p in layer.parameters())
-                value = [[idx, f"{layer}", round((all_time / epoch), 3), f"{x.shape}",pytorch_total_params,
-                          total_num,len(pickle.dumps(x)),round(size, 3)]]
+                value = [[idx, f"{layer}", round((all_time / epoch), 3), f"{x.shape}", total_num,round(size, 3)]]
                 write_excel_xls_append(path,sheet_name,value)
             # 计算各层的结构所包含的参数量 主要与计算时延相关
             # para = parameters.numel()
@@ -330,7 +325,7 @@ def get_excel_data(path,sheet_name,col_name):
 """
     GPU预热操作
 """
-def warmUpGpu(model,x,device):
+def warmUpGpu(model,x,device = "cuda"):
     # GPU warm-up and prevent it from going into power-saving mode
     dummy_input = torch.rand(x.shape).to(device)
 
@@ -385,7 +380,8 @@ def warmUpCpu(model,x,device):
 """
     记录GPU的用时
 """
-def recordTimeGpu(model, x, device, epoch):
+def recordTimeGpu(model, x, device = "cuda", epoch = 300):
+    model = model.to(device)
     all_time = 0.0
     for i in range(epoch):
         x = torch.rand(x.shape).to(device)
@@ -411,6 +407,7 @@ def recordTimeGpu(model, x, device, epoch):
 """
 
 def recordTimeCpu(model, x, device, epoch):
+    model = model.to(device)
     all_time = 0.0
     for i in range(epoch):
         x = torch.rand(x.shape).to(device)
@@ -446,6 +443,28 @@ def getDnnModel(index):
     elif index == 5:
         mobileNet = a5_MobileNet.mobilenet_v2()
         return mobileNet
+    elif index == 6:
+        LeNet = a6_LeNet.LeNet()
+        return LeNet
     else:
         print("no model")
         return None
+
+
+def addList(mylist):
+    for i in range(len(mylist)):
+        if i == 0:
+            continue
+        else:
+            mylist[i] = mylist[i-1] + mylist[i]
+    return mylist
+
+
+def addListReverse(mylist):
+    length = len(mylist)
+    for i in range(length-1,-1,-1):
+        if i == length - 1:
+            continue
+        else:
+            mylist[i] = mylist[i+1] + mylist[i]
+    return mylist
