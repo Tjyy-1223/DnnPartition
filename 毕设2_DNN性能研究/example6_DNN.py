@@ -50,9 +50,9 @@ if __name__ == '__main__':
 
     temp_x = x
     epoch = 300
-    save_flag = False
+    save_flag = True
     filter = True
-    path = "../res/DnnLayer_mac_power_all.xls"
+    path = "../res/DnnLayer_cuda.xls"
     if device == "cpu":
         x = function.show_features_cpu(model, x, filter=filter ,epoch=epoch,save=save_flag,model_name=model_name,path=path)
     elif device == "cuda":

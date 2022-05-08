@@ -18,6 +18,10 @@ if __name__ == '__main__':
     edge_latency = function.get_excel_data(path, sheet_name, "edge_latency")
     cloud_latency = function.get_excel_data(path, sheet_name, "cloud_latency")
 
+    temp_list = []
+    for i in range(len(edge_latency)):
+        temp_list.append(edge_latency[i] + transport_latency[i])
+    # print(end_to_end_latency)
 
     # print(index)
     # print(times)
@@ -28,12 +32,13 @@ if __name__ == '__main__':
     ind = np.arange(N)  # the x locations for the groups
     width = 0.35  # the width of the bars: can also be len(x) sequence
 
+    p1 = plt.bar(ind, edge_latency, width, color='steelblue', alpha=0.8)
+    p2 = plt.bar(ind, transport_latency, width, bottom=edge_latency,color='darkgoldenrod',alpha = 0.8)
+    p3 = plt.bar(ind, cloud_latency, width, bottom=temp_list, color="darkolivegreen",alpha = 0.8)
 
-    p1 = plt.bar(ind, cloud_latency, width,color="black")
-    p2 = plt.bar(ind, transport_latency, width, bottom=cloud_latency, color="darkgreen")
-    p3 = plt.bar(ind, edge_latency, width,bottom=transport_latency,color="royalblue")
 
-    plt.ylabel('end-to-end latency (ms)')
+
+    plt.ylabel('latency (ms)')
     # plt.title('Best Partition Point of AlexNet')
 
 
@@ -51,6 +56,6 @@ if __name__ == '__main__':
 
 
     plt.ticklabel_format(style='sci', axis='y', scilimits=(0, 0), useMathText=True)
-    plt.legend((p1[0],p2[0],p3[0]), ('cloud latency', 'transport latency','edge latency'))
+    plt.legend((p3[0],p2[0],p1[0]), ('cloud latency', 'transmission latency','edge latency'))
     plt.tight_layout()
     plt.show()
