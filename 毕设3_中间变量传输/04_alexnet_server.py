@@ -128,9 +128,9 @@ if __name__ == '__main__':
         4 epoch 测量GPU/CPU 计算epoch次取平均值
         5 device 目前使用的设备
     """
-    modelIndex = 1
-    ip = "127.0.0.1"
-    # ip = "112.86.198.187"
+    modelIndex = 6
+    # ip = "127.0.0.1"
+    ip = "122.96.111.129"
     port = 8090
     epoch = 300
     device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -166,7 +166,7 @@ if __name__ == '__main__':
     sheet_name = model_name
     value = [["index","layerName","shape","edgex_length","transport_latency","edge_latency","cloud_latency","end-to-end latency"]]
 
-    save_flag = False
+    save_flag = True
     if save_flag:
         function.create_excel_xsl(path,sheet_name,value)
     p = startServer(ip,port)
