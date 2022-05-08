@@ -94,8 +94,8 @@ if __name__ == '__main__':
         5 device 目前使用的设备
     """
     modelIndex = 6
-    ip = "127.0.0.1"
-    # ip = "112.86.199.171"
+    # ip = "127.0.0.1"
+    ip = "122.96.111.129"
     port = 8090
     epoch = 300
     device = "cpu"
