@@ -159,10 +159,10 @@ if __name__ == '__main__':
     """
         Step4 绑定的端口启动Socket 并且开始监听
     """
-    model_names = ["alexnet", "vgg16", "googLeNet", "resnet18", "mobileNetv2"]
+    model_names = ["alexnet", "vgg16", "googLeNet", "resnet18", "mobileNetv2","lenet"]
     model_name = model_names[modelIndex - 1]
 
-    path = "../res/cpu_gpu2.xls"
+    path = "../res/cpu_gpu.xls"
     sheet_name = model_name
     value = [["index","layerName","shape","edgex_length","transport_latency","edge_latency","cloud_latency","end-to-end latency"]]
 
