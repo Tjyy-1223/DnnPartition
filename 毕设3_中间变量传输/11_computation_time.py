@@ -169,7 +169,6 @@ def get_predict_data(save_flag = False):
 
 
 def get_predict_model():
-    mm = MinMaxScaler()
     path = "../res/computation_time.xls"
     # sheet_name = "mac_one"
     sheet_name = "cuda_all2"
@@ -192,18 +191,26 @@ def get_predict_model():
     # functionImg.getScatterImg(params2,times,"Params","Latency(ms)")
 
     save = False
-    # functionImg.myPolynomialRegression_single(flops2, times, "flops", "times(ms)", degree=1)
-    # functionImg.myPolynomialRegression_single(flops2, times, "flops", "times(ms)", degree=2)
-    # functionImg.myPolynomialRegression_single(flops2,times,"flops","times(ms)",degree=3)
-    # functionImg.myPolynomialRegression_single(flops2,times,"flops","times(ms)",degree=4)
-    # functionImg.myPolynomialRegression_single(flops2,times,"flops","times(ms)",degree=5)
+
 
     functionImg.myPolynomialRegression_single(flops2, times, "flops", "times(ms)", degree=3, save=save,
-                                              modelPath="../model/flops_all_time_cuda.m")
-    # #
+                                              modelPath="../model/flops_for_cuda3.m")
+
+
+
     ones = torch.ones(len(flops2))
-    x = np.c_[ones,flops2,params2]
-    functionImg.myPolynomialRegression(x,times,"y_real","y_predict",save=save,modelPath="../model/flops_params_all_time_cuda.m")
+    degree = 3
+    flops2_3 = functionImg.myTransform(flops2,degree=degree)
+    params2_3 = functionImg.myTransform(params2,degree=degree)
+    x = np.c_[ones, flops2_3, params2_3]
+    functionImg.myPolynomialRegression(x, times, "y_real", "y_predict", save=save,
+                                       modelPath="../model/flops_params_for_cuda3.m")
+
+
+
+
+
+
 
 
 
@@ -212,9 +219,8 @@ def compare_alexnet():
     device = "cuda" if torch.cuda.is_available() else "cpu"
 
     # flops_predict_model = joblib.load("../model/flops_time_cuda.m")
-    flops_params_predict_model = joblib.load("../model/flops_params_time_cuda.m")
+    flops_params_predict_model = joblib.load("../model/flops_params_for_cuda3.m")
 
-    # flops_params_predict_model = joblib.load("../model/flops_params_all_time_cuda.m")
 
     model = function.getDnnModel(1)
     model = model.to(device)
@@ -263,7 +269,7 @@ def compare_alexnet():
 
         print(f"flops: {flops_sum}  \t  params: {params_sum}  \t  computation time: {computation_time:.3f} (ms) \t "
               # f"flops predict : {functionImg.predictFlopsTime(flops_predict_model,flops_sum/10000):.3f} \t "
-              f"flops params predict : {functionImg.predictFlopsParamsTime(flops_params_predict_model,flops_sum/10000,params_sum/10000):.3f}")
+              f"flops params predict : {functionImg.predictFlopsParamsTime_for_cuda3(flops_params_predict_model,flops_sum/10000,params_sum/10000):.3f}")
         print("=============================================================")
         index += 1
 
@@ -329,10 +335,10 @@ if __name__ == '__main__':
     # get_predict_data(save_flag)
 
     """ 构建模型 """
-    get_predict_model()
+    # get_predict_model()
 
     """ 数据比较 """
-    # compare_alexnet()
+    compare_alexnet()
 
 
     # test_model(False)

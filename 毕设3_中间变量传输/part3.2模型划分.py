@@ -48,6 +48,7 @@ if __name__ == '__main__':
     # print(times)
 
 
+    # plt.figure(figsize=(12,3.5))
     plt.figure(figsize=(5,3.5))
     N = len(index)
     ind = np.arange(N)  # the x locations for the groups
@@ -64,7 +65,7 @@ if __name__ == '__main__':
 
 
     plt.xticks(ind, list_6)
-    plt.xticks(rotation=-45)
+    plt.xticks(rotation=-25)
 
 
 

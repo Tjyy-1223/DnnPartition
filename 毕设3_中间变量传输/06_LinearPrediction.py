@@ -34,7 +34,7 @@ def LinearPredict_mac():
 
 if __name__ == '__main__':
     path = "../res/linear_time.xls"
-    sheet_name = "cuda"
+    sheet_name = "mac"
 
     input_size = function.get_excel_data(path,sheet_name,"inputSize")
     output_size = function.get_excel_data(path,sheet_name,"outputSize")
@@ -48,8 +48,8 @@ if __name__ == '__main__':
     x2 = np.array(output_size)
     x = x1 * x2
     y = np.array(computation_time)
-    labelx = "input size * output size"
-    labely = "computation time(ms)"
+    labelx = "in_features * out_features"
+    labely = "computation latency(ms)"
 
 
     save_flag = False
@@ -59,13 +59,13 @@ if __name__ == '__main__':
         cuda:test MSE: 0.010853177534155763
         mac:test MSE: 2.497869087969718
     """
-    # functionImg.myLinearRegression(x,y,labelx,labely,save_flag,modelPath)
+    functionImg.myLinearRegression(x,y,labelx,labely)
 
     # functionImg.myPolynomialRegression(x,y)
 
-    LinearPredict_cuda()
-
-    LinearPredict_mac()
+    # LinearPredict_cuda()
+    #
+    # LinearPredict_mac()
 
 
 

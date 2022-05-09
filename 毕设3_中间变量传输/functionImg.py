@@ -219,6 +219,61 @@ def myPolynomialRegression(x, y,labelx,labely,devide_n=1,save = False,modelPath 
     return lin_reg
 
 
+def myPolynomialRegression2(x, y,labelx,labely,devide_n=1,save = False,modelPath = None):
+    """
+        根据多项式回归模拟图
+    """
+    s = 50
+
+    X2 = myTransform(x, degree=2)
+    # X2 = x
+    lin_reg = LinearRegression()
+    lin_reg.fit(X2, y)
+
+    y_predict = lin_reg.predict(X2)
+    print("test MSE:", metrics.mean_squared_error(y_predict, y))
+    # print("斜率参数: ",lin_reg.coef_)
+    # print("截距参数: ",lin_reg.intercept_)
+    """
+    degree = 2
+    斜率参数: [0.00000000e+00 2.11090193e-04 5.44408375e-10]
+    截距参数: 40.11139070205547
+
+    degree = 3
+    斜率参数:  [0.00000000e+00 4.87227671e-04 2.36099771e-10 8.03935911e-17]
+    截距参数:  6.9646173709356844
+    """
+    fig = plt.figure(figsize=(8, 5))
+    # plt.scatter(x, y, s, c="g", alpha=0.5)
+    # plt.scatter(x, y_predict)
+    # plt.plot(np.sort(x), y_predict[np.argsort(x)], color='r')
+
+    plt.scatter(y, y_predict)
+
+
+
+    plt.ticklabel_format(style='sci', axis='x', scilimits=(0, 0), useMathText=True)
+    plt.ticklabel_format(style='sci', axis='y', scilimits=(0, 0), useMathText=True)
+
+    # 设置坐标轴范围
+    # n = devide_n
+    # y_n = devide_n
+    # max_X = np.max(x)
+    # max_Y = np.max(y)
+    # plt.xlim((0, max_X))
+    # plt.ylim((0, max_Y))
+
+    plt.xlabel(labelx)
+    plt.ylabel(labely)
+
+    plt.show()
+
+    if save:
+        joblib.dump(lin_reg,modelPath)
+
+    return lin_reg
+
+
 def myPolynomialRidgeRegression(x,y,labelx,labely,save = False,modelPath = None):
     """
         Ridge 多项式回归
@@ -342,3 +397,20 @@ def predictFlopsParamsTime(model,flops,params):
     input_features = np.c_[ones,flops,params]
     computation_time = model.predict(input_features)[0]
     return computation_time
+
+
+
+def predictFlopsParamsTime_for_cuda3(model,flops,params):
+    flops = np.array(flops)
+    params = np.array(params)
+    ones = torch.ones(1)
+
+    degree = 3
+    flops2_3 = myTransform(flops, degree=degree)
+    params2_3 = myTransform(params, degree=degree)
+    input_features = np.c_[ones, flops2_3, params2_3]
+
+    computation_time = model.predict(input_features)[0]
+    return computation_time
+
+
