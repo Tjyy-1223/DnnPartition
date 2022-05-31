@@ -37,7 +37,7 @@ lowerlimits = np.array([0, 1] * 2)
 
 
 ax.errorbar(ind,times1, yerr=0.1,label='Cloud')
-ax.errorbar(ind,times2, yerr=0.1,label='Edge')
+ax.errorbar(ind,times2, yerr=0.1,label='Edge',linestyle="--")
 
 
 ax.set_xticks(ind)

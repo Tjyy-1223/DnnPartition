@@ -40,7 +40,7 @@ ax2 = ax1.twinx()
 
 ax1.plot(ind,transport_num1,label='Output Size',color='mediumturquoise',alpha = 0.9)
 ax1.scatter(ind,transport_num1,color='mediumturquoise',alpha = 0.9)
-ax2.plot(ind,transport_latency,label='Transmission Latency',color='goldenrod',alpha = 0.9)
+ax2.plot(ind,transport_latency,label='Transmission Latency',color='goldenrod',alpha = 0.9,linestyle="--")
 ax2.scatter(ind,transport_latency,color='goldenrod',alpha = 0.9)
 # ax2.plot((0,14),(15,15),color="red")
 

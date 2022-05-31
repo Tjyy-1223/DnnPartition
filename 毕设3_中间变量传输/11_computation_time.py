@@ -171,7 +171,7 @@ def get_predict_data(save_flag = False):
 def get_predict_model():
     path = "../res/computation_time.xls"
     # sheet_name = "mac_one"
-    sheet_name = "cuda_all2"
+    sheet_name = "cuda_one"
 
     flops = function.get_excel_data(path,sheet_name,"flops")
     flops2 = function.get_excel_data(path,sheet_name,"flops2")
@@ -186,9 +186,9 @@ def get_predict_model():
     times = np.array(times)
 
     # functionImg.getScatterImg(flops,times,"flops","times(ms)")
-    # functionImg.getScatterImg(flops2,times,"FLOPs","Latency(ms)")
+    functionImg.getScatterImg(flops2,times,"FLOPs","Latency(ms)")
     # functionImg.getScatterImg(params,times,"params","times(ms)")
-    # functionImg.getScatterImg(params2,times,"Params","Latency(ms)")
+    functionImg.getScatterImg(params2,times,"Params","Latency(ms)")
 
     save = False
 
@@ -335,10 +335,10 @@ if __name__ == '__main__':
     # get_predict_data(save_flag)
 
     """ 构建模型 """
-    # get_predict_model()
+    get_predict_model()
 
     """ 数据比较 """
-    compare_alexnet()
+    # compare_alexnet()
 
 
     # test_model(False)

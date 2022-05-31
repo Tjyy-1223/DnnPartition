@@ -19,27 +19,24 @@ if __name__ == '__main__':
     # print(times)
 
 
-    ind = np.arange(4)  # the x locations for the groups
+    ind = np.arange(6)  # the x locations for the groups
     width = 0.33  # the width of the bars
 
     # fig = plt.figure(figsize=(8,3.5))
 
-    edge_value = [0.001,25.09,13.528]
-    transmission_value = [119.166,8.159,0.18]
-    cloud_value = [2.856,0.002,1.582]
-    end_value = [122.033,25.272,23.269]
 
-    cloud_compute = [0.001,119.166,2.856,122.033]
-    edge_compute = [25.09,0.18,0.002,25.272]
-    end_to_end_compute = [13.528,8.159,1.582,23.269]
+
+    cloud_compute = [122.023,114.487,71.982,102.303,86.99,102.829]
+    edge_compute = [31.272,210.779,55.959,46.905,47.033,17.167]
+    end_to_end_compute = [23.269,114.487,53.909,46.905,41.963,15.070]
 
 
     fig, ax1 = plt.subplots(figsize=(7,3))
     # ax1 = fig.add_subplot(111)
     ax1.xaxis.set_ticks_position('bottom')
     ax1.set_xticks(ind)
-    ax1.set_xticklabels(('Edge','Transmission','Cloud','End-to-end'),rotation = -15)
-    lns1 = ax1.bar(ind - width / 2, cloud_compute,width/2,label='Cloud-Only')
+    ax1.set_xticklabels(('AlexNet','Vgg-16','GoogLeNet','ResNet-18','MobileNet v2','LeNet'),rotation = -15)
+    lns1 = ax1.bar(ind - width / 2, cloud_compute,width/2, color="darkolivegreen",label='Cloud-Only',alpha = 0.8)
 
     # Add some text for labels, title and custom x-axis tick labels, etc.
     # ax.set_ylabel('Scores')
@@ -49,8 +46,8 @@ if __name__ == '__main__':
     # ax2.set_xticklabels(('conv1', 'maxPool2d1', 'conv2', 'maxPool2d2', 'conv3',
     #                      'conv4', 'conv5', 'maxPool2d3', 'avgPool2d', 'flatten',
     #                      'linear1', 'linear2', 'linear3'), rotation=-45)
-    lns2 = ax1.bar(ind , edge_compute, width/2, color='darkblue', label='Edge-Only')
-    ax1.bar(ind+ width / 2,end_to_end_compute,width/2,color='darkcyan',label='Edge-Cloud')
+    lns2 = ax1.bar(ind , edge_compute, width/2, color='steelblue', label='Edge-Only',alpha = 0.8)
+    ax1.bar(ind+ width / 2,end_to_end_compute,width/2,color='darkgoldenrod',label='Edge-Cloud',alpha = 0.8)
     # ax2.set_title('Latency And Shape of AlexNet')
 
     # fig.legend(loc=1, bbox_to_anchor=(1,1), bbox_transform=ax1.transAxes)
